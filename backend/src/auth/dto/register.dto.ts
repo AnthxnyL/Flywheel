@@ -5,6 +5,7 @@ export class RegisterDto {
   @IsEmail()
   email: string
 
+  // min 8 chars, at least 1 uppercase, at least 1 digit
   @IsString()
   @MinLength(8)
   @Matches(/^(?=.*[A-Z])(?=.*\d).{8,}$/, {

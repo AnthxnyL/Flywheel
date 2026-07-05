@@ -3,7 +3,11 @@ import api from '../services/api'
 
 export type Role = 'DRIVER' | 'DEALER' | 'BRAND'
 
-interface AuthUser { id: string; email: string; role: Role }
+interface AuthUser {
+  id: string
+  email: string
+  role: Role
+}
 
 interface AuthContextValue {
   user: AuthUser | null
@@ -18,6 +22,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
+  // Access token lives only in memory — never written to localStorage or cookies
   const accessTokenRef = useRef<string | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -34,22 +39,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
   }
 
+  // On mount, try to restore session from the httpOnly refresh token cookie
   useEffect(() => {
     api.post('/auth/refresh')
       .then(({ data }) => setTokens(data.accessToken, data.user))
-      .catch(() => {})
+      .catch(() => { /* no active session */ })
       .finally(() => setLoading(false))
   }, [])
 
+  // Axios interceptor: attach access token + auto-refresh on 401
   useEffect(() => {
     const reqId = api.interceptors.request.use((config) => {
-      if (accessTokenRef.current) config.headers.Authorization = `Bearer ${accessTokenRef.current}`
+      if (accessTokenRef.current) {
+        config.headers.Authorization = `Bearer ${accessTokenRef.current}`
+      }
       return config
     })
+
     const resId = api.interceptors.response.use(
       (res) => res,
       async (err) => {
         const original = err.config
+        // Retry once with a fresh access token if we get a 401 (expired token)
         if (err.response?.status === 401 && !original._retry) {
           original._retry = true
           try {
@@ -57,12 +68,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setTokens(data.accessToken, data.user)
             original.headers.Authorization = `Bearer ${data.accessToken}`
             return api(original)
-          } catch { clearTokens() }
+          } catch {
+            clearTokens()
+          }
         }
         return Promise.reject(err)
       },
     )
-    return () => { api.interceptors.request.eject(reqId); api.interceptors.response.eject(resId) }
+
+    return () => {
+      api.interceptors.request.eject(reqId)
+      api.interceptors.response.eject(resId)
+    }
   }, [])
 
   const login = useCallback(async (email: string, password: string) => {

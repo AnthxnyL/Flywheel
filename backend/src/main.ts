@@ -13,7 +13,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: process.env.APP_URL ?? 'http://localhost:5173',
-    credentials: true,
+    credentials: true, // required to accept cookies cross-origin in dev
   });
 
   await app.listen(process.env.PORT ?? 3000);
