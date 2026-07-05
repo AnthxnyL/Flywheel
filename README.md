@@ -22,10 +22,10 @@ Application web de suivi d'entretien véhicule en marque blanche, destinée aux 
 # Cloner le projet
 git clone <repo-url> && cd flywheel
 
-# Frontend
+# Frontend et installation
 cd frontend && npm install
 
-# Backend
+# Backend et installation
 cd ../backend && npm install
 ```
 
