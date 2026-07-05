@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { UserPlus } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
@@ -33,9 +34,19 @@ export default function DealerDashboardPage() {
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
       <header className="bg-[var(--color-surface)] border-b border-[var(--color-border)] px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <h1 className="text-lg font-bold text-[var(--color-text-primary)]">Flywheel</h1>
-          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Back-office</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-bold text-[var(--color-text-primary)]">Flywheel</h1>
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Back-office</span>
+          </div>
+          <nav className="flex items-center gap-1 ml-4">
+            <Link to="/back-office/dashboard" className="text-sm font-medium text-[var(--color-primary)] bg-blue-50 px-3 py-1.5 rounded-md">
+              Tableau de bord
+            </Link>
+            <Link to="/back-office/fleet" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] px-3 py-1.5 rounded-md hover:bg-gray-100 transition">
+              Flotte
+            </Link>
+          </nav>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-[var(--color-text-secondary)]">{user?.email}</span>

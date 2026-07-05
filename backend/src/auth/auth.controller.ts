@@ -81,6 +81,14 @@ export class AuthController {
     return this.auth.activateAccount(dto)
   }
 
+  // DEALER: list all driver accounts
+  @Get('clients')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('DEALER')
+  getClients() {
+    return this.auth.getClients()
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: { id: string; email: string; role: string }) {

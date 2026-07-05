@@ -40,9 +40,12 @@ model Vehicle {
   vin                String              @unique
   brand              String
   model              String
+  year               Int?
+  licensePlate       String?
   mileage            Int
-  driver             User                @relation(fields: [driverId], references: [id])
-  driverId           String
+  driver             User?               @relation(fields: [driverId], references: [id])
+  driverId           String?             // null = unassigned vehicle
+  createdAt          DateTime            @default(now())
   contracts          Contract[]
   maintenanceRecords MaintenanceRecord[]
 }
