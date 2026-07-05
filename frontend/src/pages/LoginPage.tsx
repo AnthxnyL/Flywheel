@@ -11,17 +11,21 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // If already logged in, redirect immediately
   if (user) {
-    navigate(user.role === 'DEALER' ? '/back-office/dashboard' : '/app/dashboard', { replace: true })
+    const dest = user.role === 'DEALER' ? '/back-office/dashboard' : '/app/dashboard'
+    navigate(dest, { replace: true })
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
+
     try {
       const loggedUser = await login(email, password)
-      navigate(loggedUser.role === 'DEALER' ? '/back-office/dashboard' : '/app/dashboard', { replace: true })
+      const dest = loggedUser.role === 'DEALER' ? '/back-office/dashboard' : '/app/dashboard'
+      navigate(dest, { replace: true })
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
       setError(msg ?? 'Une erreur est survenue')
@@ -39,39 +43,64 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
+          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            {error}
+          </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
-            <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1" htmlFor="email">Email</label>
-            <input id="email" type="email" autoComplete="email" required value={email}
+            <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition"
-              placeholder="vous@exemple.fr" />
+              placeholder="vous@exemple.fr"
+            />
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-medium text-[var(--color-text-primary)]" htmlFor="password">Mot de passe</label>
-              <Link to="/forgot-password" className="text-sm text-[var(--color-primary)] hover:underline">Mot de passe oublié ?</Link>
+              <label className="block text-sm font-medium text-[var(--color-text-primary)]" htmlFor="password">
+                Mot de passe
+              </label>
+              <Link to="/forgot-password" className="text-sm text-[var(--color-primary)] hover:underline">
+                Mot de passe oublié ?
+              </Link>
             </div>
-            <input id="password" type="password" autoComplete="current-password" required value={password}
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition"
-              placeholder="••••••••" />
+              placeholder="••••••••"
+            />
           </div>
 
-          <button type="submit" disabled={loading}
+          <button
+            type="submit"
+            disabled={loading}
             className="w-full py-2.5 px-4 rounded-lg font-medium text-white transition disabled:opacity-60"
-            style={{ backgroundColor: 'var(--color-primary)' }}>
+            style={{ backgroundColor: 'var(--color-primary)' }}
+          >
             {loading ? 'Connexion…' : 'Se connecter'}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-[var(--color-text-secondary)]">
-          Vous êtes concessionnaire ?{' '}
-          <Link to="/register" className="text-[var(--color-primary)] font-medium hover:underline">Créer un compte</Link>
+          Pas encore de compte ?{' '}
+          <Link to="/register" className="text-[var(--color-primary)] font-medium hover:underline">
+            Créer un compte
+          </Link>
         </p>
       </div>
     </div>

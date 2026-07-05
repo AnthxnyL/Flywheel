@@ -18,20 +18,6 @@ export class EmailService {
     })
   }
 
-  async sendActivationEmail(to: string, token: string) {
-    const appUrl = this.config.get('APP_URL')
-    const link = `${appUrl}/activate?token=${token}`
-
-    await this.send(to, 'Activez votre compte Flywheel', `
-      <h2>Bienvenue sur Flywheel</h2>
-      <p>Votre concessionnaire a créé un espace pour vous. Cliquez sur le bouton ci-dessous pour définir votre mot de passe :</p>
-      <a href="${link}" style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0;">
-        Activer mon compte
-      </a>
-      <p style="color:#64748b;margin-top:8px">Ce lien est valable 7 jours.</p>
-    `)
-  }
-
   async sendVerificationEmail(to: string, token: string) {
     const appUrl = this.config.get('APP_URL')
     const link = `${appUrl}/verify-email?token=${token}`
@@ -46,6 +32,20 @@ export class EmailService {
     `)
   }
 
+  async sendActivationEmail(to: string, token: string) {
+    const appUrl = this.config.get('APP_URL')
+    const link = `${appUrl}/activate?token=${token}`
+
+    await this.send(to, 'Activez votre compte Flywheel', `
+      <h2>Bienvenue sur Flywheel</h2>
+      <p>Votre concessionnaire a créé un espace pour vous. Cliquez sur le bouton ci-dessous pour définir votre mot de passe et accéder à votre espace :</p>
+      <a href="${link}" style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0;">
+        Activer mon compte
+      </a>
+      <p style="color:#64748b;margin-top:8px">Ce lien est valable 7 jours.</p>
+    `)
+  }
+
   async sendPasswordResetEmail(to: string, token: string) {
     const appUrl = this.config.get('APP_URL')
     const link = `${appUrl}/reset-password?token=${token}`
@@ -56,7 +56,7 @@ export class EmailService {
       <a href="${link}" style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;">
         Réinitialiser le mot de passe
       </a>
-      <p style="color:#64748b;margin-top:16px">Ce lien expire dans 1h.</p>
+      <p style="color:#64748b;margin-top:16px">Ce lien expire dans 1h. Si vous n'avez pas fait cette demande, ignorez cet email.</p>
     `)
   }
 

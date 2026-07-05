@@ -22,8 +22,10 @@ export default function ProtectedRoute({ allowedRoles }: Props) {
     )
   }
 
+  // Not logged in → login page
   if (!user) return <Navigate to="/login" replace />
 
+  // Wrong role → redirect to the user's own dashboard (never show a 403)
   if (!allowedRoles.includes(user.role)) {
     return <Navigate to={ROLE_HOME[user.role as Role]} replace />
   }

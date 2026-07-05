@@ -39,7 +39,12 @@ export default function DealerDashboardPage() {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-[var(--color-text-secondary)]">{user?.email}</span>
-          <button onClick={logout} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition">Déconnexion</button>
+          <button
+            onClick={logout}
+            className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition"
+          >
+            Déconnexion
+          </button>
         </div>
       </header>
 
@@ -49,55 +54,85 @@ export default function DealerDashboardPage() {
             <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">Tableau de bord</h2>
             <p className="text-[var(--color-text-secondary)] mt-1">Gérez vos clients et interventions.</p>
           </div>
-          <button onClick={() => setShowForm(true)}
+          <button
+            onClick={() => setShowForm(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-white text-sm transition"
-            style={{ backgroundColor: 'var(--color-primary)' }}>
+            style={{ backgroundColor: 'var(--color-primary)' }}
+          >
             <UserPlus size={16} />
             Ajouter un client
           </button>
         </div>
 
         {feedback && (
-          <div className={`mb-6 p-4 rounded-lg border text-sm ${feedback.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
+          <div className={`mb-6 p-4 rounded-lg border text-sm ${
+            feedback.type === 'success'
+              ? 'bg-green-50 border-green-200 text-green-700'
+              : 'bg-red-50 border-red-200 text-red-700'
+          }`}>
             {feedback.msg}
           </div>
         )}
 
+        {/* Add client modal */}
         {showForm && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
             <div className="bg-[var(--color-surface)] rounded-2xl shadow-xl border border-[var(--color-border)] p-6 w-full max-w-md">
               <h3 className="text-lg font-bold text-[var(--color-text-primary)] mb-1">Ajouter un client</h3>
-              <p className="text-sm text-[var(--color-text-secondary)] mb-5">Un email d'activation sera envoyé au client pour qu'il définisse son mot de passe.</p>
+              <p className="text-sm text-[var(--color-text-secondary)] mb-5">
+                Un email d'activation sera envoyé au client pour qu'il définisse son mot de passe.
+              </p>
 
               <form onSubmit={handleCreateClient} className="space-y-4" noValidate>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Prénom</label>
-                    <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}
+                    <input
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition text-sm"
-                      placeholder="Jean" />
+                      placeholder="Jean"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Nom</label>
-                    <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)}
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition text-sm"
-                      placeholder="Dupont" />
+                      placeholder="Dupont"
+                    />
                   </div>
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Email *</label>
-                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition text-sm"
-                    placeholder="client@exemple.fr" />
+                    placeholder="client@exemple.fr"
+                  />
                 </div>
+
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => setShowForm(false)}
-                    className="flex-1 py-2 rounded-lg border border-[var(--color-border)] text-sm font-medium text-[var(--color-text-secondary)] hover:bg-gray-50 transition">
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="flex-1 py-2 rounded-lg border border-[var(--color-border)] text-sm font-medium text-[var(--color-text-secondary)] hover:bg-gray-50 transition"
+                  >
                     Annuler
                   </button>
-                  <button type="submit" disabled={loading || !email}
+                  <button
+                    type="submit"
+                    disabled={loading || !email}
                     className="flex-1 py-2 rounded-lg font-medium text-white text-sm transition disabled:opacity-60"
-                    style={{ backgroundColor: 'var(--color-primary)' }}>
+                    style={{ backgroundColor: 'var(--color-primary)' }}
+                  >
                     {loading ? 'Envoi…' : "Envoyer l'invitation"}
                   </button>
                 </div>

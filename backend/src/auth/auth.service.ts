@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -8,7 +9,7 @@ import { JwtService } from '@nestjs/jwt'
 import { Role } from '@prisma/client'
 import * as bcrypt from 'bcrypt'
 import * as crypto from 'crypto'
-import type { Response } from 'express'
+import { Response } from 'express'
 import { PrismaService } from '../prisma/prisma.service'
 import { EmailService } from './email.service'
 import { LoginDto } from './dto/login.dto'
@@ -29,7 +30,6 @@ export class AuthService {
     private email: EmailService,
   ) {}
 
-  // Self-registration for DEALER accounts only
   async register(dto: RegisterDto) {
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } })
     if (exists) throw new BadRequestException('Cet email est déjà utilisé')
@@ -37,11 +37,17 @@ export class AuthService {
     const password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS)
     const emailVerificationToken = crypto.randomBytes(32).toString('hex')
 
-    await this.prisma.user.create({
-      data: { email: dto.email, password, role: dto.role as Role, emailVerificationToken },
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        password,
+        role: dto.role as Role,
+        emailVerificationToken,
+      },
     })
 
-    await this.email.sendVerificationEmail(dto.email, emailVerificationToken)
+    await this.email.sendVerificationEmail(user.email, emailVerificationToken)
+
     return { message: 'Compte créé. Vérifiez votre email pour activer votre compte.' }
   }
 
@@ -58,18 +64,22 @@ export class AuthService {
       throw new UnauthorizedException('Veuillez vérifier votre email avant de vous connecter')
     }
 
-    const tokens = this.generateTokens(user.id, user.email, user.role as string)
+    const tokens = this.generateTokens(user.id, user.email, user.role)
 
-    // Refresh token in httpOnly SameSite=Strict cookie — protected from XSS and CSRF
+    // Refresh token in httpOnly cookie — not readable by JS (XSS protection).
+    // SameSite=Strict means it won't be sent on cross-site requests (CSRF protection).
     res.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
       sameSite: 'strict',
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
       path: '/auth/refresh',
     })
 
-    return { accessToken: tokens.accessToken, user: { id: user.id, email: user.email, role: user.role } }
+    return {
+      accessToken: tokens.accessToken,
+      user: { id: user.id, email: user.email, role: user.role },
+    }
   }
 
   async refresh(refreshToken: string | undefined) {
@@ -96,7 +106,9 @@ export class AuthService {
   }
 
   async verifyEmail(token: string) {
-    const user = await this.prisma.user.findUnique({ where: { emailVerificationToken: token } })
+    const user = await this.prisma.user.findUnique({
+      where: { emailVerificationToken: token },
+    })
     if (!user) throw new BadRequestException('Lien de vérification invalide ou expiré')
 
     await this.prisma.user.update({
@@ -107,7 +119,7 @@ export class AuthService {
     return { message: 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.' }
   }
 
-  // Called by a DEALER to invite a client — creates account without password
+  // Called by a DEALER to create a client account and send an activation email
   async createClient(dto: CreateClientDto) {
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } })
     if (exists) throw new BadRequestException('Un compte existe déjà pour cet email')
@@ -115,16 +127,24 @@ export class AuthService {
     const activationToken = crypto.randomBytes(32).toString('hex')
 
     await this.prisma.user.create({
-      data: { email: dto.email, password: null, role: Role.DRIVER, emailVerificationToken: activationToken },
+      data: {
+        email: dto.email,
+        password: null,
+        role: Role.DRIVER,
+        emailVerificationToken: activationToken,
+      },
     })
 
     await this.email.sendActivationEmail(dto.email, activationToken)
+
     return { message: `Lien d'activation envoyé à ${dto.email}` }
   }
 
   // Called when the client clicks the activation link and sets their password
   async activateAccount(dto: ActivateAccountDto) {
-    const user = await this.prisma.user.findUnique({ where: { emailVerificationToken: dto.token } })
+    const user = await this.prisma.user.findUnique({
+      where: { emailVerificationToken: dto.token },
+    })
     if (!user) throw new BadRequestException("Lien d'activation invalide ou expiré")
 
     const password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS)
@@ -152,11 +172,14 @@ export class AuthService {
     })
 
     await this.email.sendPasswordResetEmail(user.email, token)
+
     return { message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' }
   }
 
   async resetPassword(dto: ResetPasswordDto) {
-    const user = await this.prisma.user.findUnique({ where: { passwordResetToken: dto.token } })
+    const user = await this.prisma.user.findUnique({
+      where: { passwordResetToken: dto.token },
+    })
 
     if (!user || !user.passwordResetExpires || user.passwordResetExpires < new Date()) {
       throw new BadRequestException('Lien de réinitialisation invalide ou expiré')

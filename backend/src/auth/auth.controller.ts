@@ -1,16 +1,26 @@
-import { Body, Controller, Get, HttpCode, Post, Query, Req, Res, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common'
 import type { Request, Response } from 'express'
 import { AuthService } from './auth.service'
-import { ActivateAccountDto } from './dto/activate-account.dto'
-import { CreateClientDto } from './dto/create-client.dto'
 import { ForgotPasswordDto } from './dto/forgot-password.dto'
 import { LoginDto } from './dto/login.dto'
 import { RegisterDto } from './dto/register.dto'
 import { ResetPasswordDto } from './dto/reset-password.dto'
-import { CurrentUser } from './decorators/current-user.decorator'
-import { Roles } from './decorators/roles.decorator'
+import { CreateClientDto } from './dto/create-client.dto'
+import { ActivateAccountDto } from './dto/activate-account.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { RolesGuard } from './guards/roles.guard'
+import { Roles } from './decorators/roles.decorator'
+import { CurrentUser } from './decorators/current-user.decorator'
 
 @Controller('auth')
 export class AuthController {

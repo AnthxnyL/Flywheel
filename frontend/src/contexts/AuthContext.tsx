@@ -22,6 +22,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
+  // Access token lives only in memory — never written to localStorage or cookies
   const accessTokenRef = useRef<string | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -38,13 +39,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
   }
 
+  // On mount, try to restore session from the httpOnly refresh token cookie
   useEffect(() => {
     api.post('/auth/refresh')
       .then(({ data }) => setTokens(data.accessToken, data.user))
-      .catch(() => {})
+      .catch(() => { /* no active session */ })
       .finally(() => setLoading(false))
   }, [])
 
+  // Axios interceptor: attach access token + auto-refresh on 401
   useEffect(() => {
     const reqId = api.interceptors.request.use((config) => {
       if (accessTokenRef.current) {
@@ -57,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (res) => res,
       async (err) => {
         const original = err.config
+        // Retry once with a fresh access token if we get a 401 (expired token)
         if (err.response?.status === 401 && !original._retry) {
           original._retry = true
           try {
