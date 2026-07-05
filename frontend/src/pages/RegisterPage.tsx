@@ -1,8 +1,6 @@
 import { FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { type Role, useAuth } from '../contexts/AuthContext'
-
-const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d).{8,}$/
+import { useAuth } from '../contexts/AuthContext'
 
 function validatePassword(p: string): string {
   if (p.length < 8) return 'Au moins 8 caractères'
@@ -17,7 +15,8 @@ export default function RegisterPage() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState<Role>('DRIVER')
+  // Only dealers can self-register — drivers are created by their dealer
+  const role = 'DEALER' as const
   const [passwordError, setPasswordError] = useState('')
   const [serverError, setServerError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -70,8 +69,8 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4">
       <div className="w-full max-w-md bg-[var(--color-surface)] rounded-2xl shadow-sm border border-[var(--color-border)] p-8">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Créer un compte</h1>
-          <p className="text-[var(--color-text-secondary)] mt-1">Rejoignez Flywheel</p>
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Espace concessionnaire</h1>
+          <p className="text-[var(--color-text-secondary)] mt-1">Créez votre compte back-office</p>
         </div>
 
         {serverError && (
@@ -81,29 +80,16 @@ export default function RegisterPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          {/* Role selector */}
+          {/* Role is fixed to DEALER — drivers are invited by their dealer */}
           <div>
-            <p className="text-sm font-medium text-[var(--color-text-primary)] mb-2">Je suis…</p>
-            <div className="grid grid-cols-2 gap-3">
-              {([
-                { value: 'DRIVER', label: 'Un particulier', desc: 'Automobiliste en LOA/LLD' },
-                { value: 'DEALER', label: 'Un concessionnaire', desc: 'Back-office atelier' },
-              ] as const).map(({ value, label, desc }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setRole(value)}
-                  className={`p-3 rounded-lg border-2 text-left transition ${
-                    role === value
-                      ? 'border-[var(--color-primary)] bg-blue-50'
-                      : 'border-[var(--color-border)] hover:border-gray-300'
-                  }`}
-                >
-                  <p className="font-medium text-sm text-[var(--color-text-primary)]">{label}</p>
-                  <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{desc}</p>
-                </button>
-              ))}
+            <div className="p-3 rounded-lg border-2 border-[var(--color-primary)] bg-blue-50">
+              <p className="font-medium text-sm text-[var(--color-text-primary)]">Concessionnaire</p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Accès au back-office atelier</p>
             </div>
+            <p className="text-xs text-[var(--color-text-muted)] mt-2">
+              Vous êtes un client particulier ?{' '}
+              <span className="font-medium">Contactez votre concessionnaire</span> — il créera votre compte.
+            </p>
           </div>
 
           <div>

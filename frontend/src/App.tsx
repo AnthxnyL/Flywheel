@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import VerifyEmailPage from './pages/VerifyEmailPage'
+import ActivatePage from './pages/ActivatePage'
 import DriverDashboardPage from './pages/app/DashboardPage'
 import DealerDashboardPage from './pages/back-office/DashboardPage'
 
@@ -22,6 +23,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/activate" element={<ActivatePage />} />
 
           {/* Protected: DRIVER only */}
           <Route element={<ProtectedRoute allowedRoles={['DRIVER']} />}>

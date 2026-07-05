@@ -16,6 +16,8 @@ import { LoginDto } from './dto/login.dto'
 import { RegisterDto } from './dto/register.dto'
 import { ForgotPasswordDto } from './dto/forgot-password.dto'
 import { ResetPasswordDto } from './dto/reset-password.dto'
+import { CreateClientDto } from './dto/create-client.dto'
+import { ActivateAccountDto } from './dto/activate-account.dto'
 
 const BCRYPT_ROUNDS = 12
 
@@ -52,6 +54,8 @@ export class AuthService {
   async login(dto: LoginDto, res: Response) {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } })
     if (!user) throw new UnauthorizedException('Email ou mot de passe incorrect')
+
+    if (!user.password) throw new UnauthorizedException('Compte non activé. Vérifiez votre email.')
 
     const valid = await bcrypt.compare(dto.password, user.password)
     if (!valid) throw new UnauthorizedException('Email ou mot de passe incorrect')
@@ -113,6 +117,44 @@ export class AuthService {
     })
 
     return { message: 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.' }
+  }
+
+  // Called by a DEALER to create a client account and send an activation email
+  async createClient(dto: CreateClientDto) {
+    const exists = await this.prisma.user.findUnique({ where: { email: dto.email } })
+    if (exists) throw new BadRequestException('Un compte existe déjà pour cet email')
+
+    const activationToken = crypto.randomBytes(32).toString('hex')
+
+    await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        password: null,
+        role: Role.DRIVER,
+        emailVerificationToken: activationToken,
+      },
+    })
+
+    await this.email.sendActivationEmail(dto.email, activationToken)
+
+    return { message: `Lien d'activation envoyé à ${dto.email}` }
+  }
+
+  // Called when the client clicks the activation link and sets their password
+  async activateAccount(dto: ActivateAccountDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { emailVerificationToken: dto.token },
+    })
+    if (!user) throw new BadRequestException("Lien d'activation invalide ou expiré")
+
+    const password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS)
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { password, emailVerified: true, emailVerificationToken: null },
+    })
+
+    return { message: 'Compte activé avec succès. Vous pouvez maintenant vous connecter.' }
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {

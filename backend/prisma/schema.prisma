@@ -28,7 +28,7 @@ enum ContractType {
 model User {
   id                     String    @id @default(cuid())
   email                  String    @unique
-  password               String
+  password               String?   // null until the client activates their account
   role                   Role
   emailVerified          Boolean   @default(false)
   emailVerificationToken String?   @unique
