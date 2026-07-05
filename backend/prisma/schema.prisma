@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   previewFeatures = []
@@ -51,20 +48,20 @@ model Vehicle {
 }
 
 model Contract {
-  id            String       @id @default(cuid())
-  type          ContractType
-  startDate     DateTime
-  endDate       DateTime
-  mileageLimit  Int
-  vehicle       Vehicle      @relation(fields: [vehicleId], references: [id])
-  vehicleId     String
+  id           String       @id @default(cuid())
+  type         ContractType
+  startDate    DateTime
+  endDate      DateTime
+  mileageLimit Int
+  vehicle      Vehicle      @relation(fields: [vehicleId], references: [id])
+  vehicleId    String
 }
 
 model MaintenanceRecord {
   id         String   @id @default(cuid())
   date       DateTime
   type       String
-  cost        Float
+  cost       Float
   invoiceUrl String?
   vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
   vehicleId  String
