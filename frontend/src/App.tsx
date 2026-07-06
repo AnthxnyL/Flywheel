@@ -12,6 +12,7 @@ import DriverDashboardPage from './pages/app/DashboardPage'
 import DealerDashboardPage from './pages/back-office/DashboardPage'
 import FleetPage from './pages/back-office/FleetPage'
 import VehicleDetailPage from './pages/back-office/VehicleDetailPage'
+import LogbookPage from './pages/back-office/LogbookPage'
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
             <Route path="/back-office/dashboard" element={<DealerDashboardPage />} />
             <Route path="/back-office/fleet" element={<FleetPage />} />
             <Route path="/back-office/fleet/:id" element={<VehicleDetailPage />} />
+            <Route path="/back-office/fleet/:id/logbook" element={<LogbookPage />} />
           </Route>
 
           {/* Fallback */}

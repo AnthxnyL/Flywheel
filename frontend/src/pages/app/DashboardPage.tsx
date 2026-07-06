@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
 import MaintenancePlanDriver from '../../components/MaintenancePlanDriver'
 import NotificationSettings from '../../components/NotificationSettings'
+import LogbookDriver from './LogbookPage'
 import { registerServiceWorker } from '../../services/push'
 
 interface MileageRecord {
@@ -275,6 +276,9 @@ export default function DriverDashboardPage() {
 
             {/* Maintenance plan (read-only) */}
             <MaintenancePlanDriver vehicleId={vehicle.id} />
+
+            {/* Logbook */}
+            <LogbookDriver vehicleId={vehicle.id} />
 
             {/* Notification preferences */}
             <NotificationSettings />

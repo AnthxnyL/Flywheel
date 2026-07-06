@@ -4,6 +4,7 @@ import { ArrowLeft, Car, User, Link2, Link2Off, AlertCircle, CheckCircle2, Gauge
 import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
 import MaintenancePlanDealer from '../../components/MaintenancePlanDealer'
+import { BookOpen } from 'lucide-react'
 
 interface MileageRecord {
   id: string
@@ -179,10 +180,19 @@ export default function VehicleDetailPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-10">
-        <Link to="/back-office/fleet" className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] mb-6 w-fit">
-          <ArrowLeft size={16} />
-          Retour à la flotte
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link to="/back-office/fleet" className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
+            <ArrowLeft size={16} />
+            Retour à la flotte
+          </Link>
+          <Link
+            to={`/back-office/fleet/${vehicle.id}/logbook`}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm font-medium text-[var(--color-text-secondary)] hover:bg-gray-50 transition"
+          >
+            <BookOpen size={15} />
+            Carnet de vie
+          </Link>
+        </div>
 
         {feedback && (
           <div className={`mb-6 p-4 rounded-lg border text-sm flex items-start gap-2 ${
