@@ -23,6 +23,11 @@ export class CreateVehicleDto {
   mileage: number
 
   @IsOptional()
+  @IsInt()
+  @Min(0)
+  initialMileage?: number
+
+  @IsOptional()
   @IsString()
   driverId?: string
 }

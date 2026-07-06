@@ -12,10 +12,13 @@ import { VehiclesService } from './vehicles.service'
 import { CreateVehicleDto } from './dto/create-vehicle.dto'
 import { UpdateVehicleDto } from './dto/update-vehicle.dto'
 import { AssignVehicleDto } from './dto/assign-vehicle.dto'
+import { CreateMileageRecordDto } from './dto/create-mileage-record.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { RolesGuard } from '../auth/guards/roles.guard'
 import { Roles } from '../auth/decorators/roles.decorator'
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
+
+type JwtUser = { id: string; email: string; role: string }
 
 @Controller('vehicles')
 @UseGuards(JwtAuthGuard)
@@ -34,7 +37,7 @@ export class VehiclesController {
   @Get('mine')
   @UseGuards(RolesGuard)
   @Roles('DRIVER')
-  findMine(@CurrentUser() user: { id: string }) {
+  findMine(@CurrentUser() user: JwtUser) {
     return this.vehicles.findByDriver(user.id)
   }
 
@@ -50,8 +53,8 @@ export class VehiclesController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles('DEALER')
-  create(@Body() dto: CreateVehicleDto) {
-    return this.vehicles.create(dto)
+  create(@Body() dto: CreateVehicleDto, @CurrentUser() user: JwtUser) {
+    return this.vehicles.create(dto, user.id)
   }
 
   // DEALER: update vehicle info
@@ -76,5 +79,25 @@ export class VehiclesController {
   @Roles('DEALER')
   unassign(@Param('id') id: string) {
     return this.vehicles.unassign(id)
+  }
+
+  // DEALER or DRIVER: add a mileage record
+  @Post(':id/mileage')
+  @UseGuards(RolesGuard)
+  @Roles('DEALER', 'DRIVER')
+  addMileageRecord(
+    @Param('id') id: string,
+    @Body() dto: CreateMileageRecordDto,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.vehicles.addMileageRecord(id, dto, user.id)
+  }
+
+  // DEALER: full mileage history
+  @Get(':id/mileage')
+  @UseGuards(RolesGuard)
+  @Roles('DEALER')
+  getMileageHistory(@Param('id') id: string) {
+    return this.vehicles.getMileageHistory(id)
   }
 }
