@@ -23,28 +23,45 @@ enum ContractType {
 }
 
 model User {
-  id                     String    @id @default(cuid())
-  email                  String    @unique
-  password               String?   // null until the client activates their account
+  id                     String          @id @default(cuid())
+  email                  String          @unique
+  password               String?
   role                   Role
-  emailVerified          Boolean   @default(false)
-  emailVerificationToken String?   @unique
-  passwordResetToken     String?   @unique
+  emailVerified          Boolean         @default(false)
+  emailVerificationToken String?         @unique
+  passwordResetToken     String?         @unique
   passwordResetExpires   DateTime?
-  createdAt              DateTime  @default(now())
+  createdAt              DateTime        @default(now())
   vehicles               Vehicle[]
+  mileageRecords         MileageRecord[]
 }
 
 model Vehicle {
-  id                 String              @id @default(cuid())
-  vin                String              @unique
+  id                 String          @id @default(cuid())
+  vin                String          @unique
   brand              String
   model              String
-  mileage            Int
-  driver             User                @relation(fields: [driverId], references: [id])
-  driverId           String
+  year               Int?
+  licensePlate       String?
+  mileage            Int             // always reflects latest recorded value
+  initialMileage     Int             @default(0)
+  driver             User?           @relation(fields: [driverId], references: [id])
+  driverId           String?
+  createdAt          DateTime        @default(now())
   contracts          Contract[]
   maintenanceRecords MaintenanceRecord[]
+  mileageRecords     MileageRecord[]
+}
+
+model MileageRecord {
+  id           String   @id @default(cuid())
+  mileage      Int
+  recordedAt   DateTime @default(now())
+  note         String?
+  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id])
+  vehicleId    String
+  recordedBy   User?    @relation(fields: [recordedById], references: [id])
+  recordedById String?
 }
 
 model Contract {

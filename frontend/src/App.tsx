@@ -10,6 +10,8 @@ import VerifyEmailPage from './pages/VerifyEmailPage'
 import ActivatePage from './pages/ActivatePage'
 import DriverDashboardPage from './pages/app/DashboardPage'
 import DealerDashboardPage from './pages/back-office/DashboardPage'
+import FleetPage from './pages/back-office/FleetPage'
+import VehicleDetailPage from './pages/back-office/VehicleDetailPage'
 
 function App() {
   return (
@@ -33,6 +35,8 @@ function App() {
           {/* Protected: DEALER only */}
           <Route element={<ProtectedRoute allowedRoles={['DEALER']} />}>
             <Route path="/back-office/dashboard" element={<DealerDashboardPage />} />
+            <Route path="/back-office/fleet" element={<FleetPage />} />
+            <Route path="/back-office/fleet/:id" element={<VehicleDetailPage />} />
           </Route>
 
           {/* Fallback */}

@@ -192,6 +192,14 @@ export class AuthService {
     return { message: 'Mot de passe réinitialisé avec succès.' }
   }
 
+  async getClients() {
+    return this.prisma.user.findMany({
+      where: { role: Role.DRIVER },
+      select: { id: true, email: true, emailVerified: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
   private generateTokens(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
