@@ -23,17 +23,43 @@ enum ContractType {
 }
 
 model User {
-  id                     String          @id @default(cuid())
-  email                  String          @unique
+  id                     String                   @id @default(cuid())
+  email                  String                   @unique
   password               String?
   role                   Role
-  emailVerified          Boolean         @default(false)
-  emailVerificationToken String?         @unique
-  passwordResetToken     String?         @unique
+  emailVerified          Boolean                  @default(false)
+  emailVerificationToken String?                  @unique
+  passwordResetToken     String?                  @unique
   passwordResetExpires   DateTime?
-  createdAt              DateTime        @default(now())
+  createdAt              DateTime                 @default(now())
   vehicles               Vehicle[]
   mileageRecords         MileageRecord[]
+  notificationPreference NotificationPreference?
+  pushSubscriptions      PushSubscription[]
+}
+
+model NotificationPreference {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  emailEnabled Boolean  @default(true)
+  pushEnabled  Boolean  @default(false)
+  remindJ30    Boolean  @default(true)
+  remindJ7     Boolean  @default(true)
+  remindJ1     Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, endpoint])
 }
 
 model Vehicle {
