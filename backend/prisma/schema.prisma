@@ -36,6 +36,7 @@ model User {
   mileageRecords         MileageRecord[]
   notificationPreference NotificationPreference?
   pushSubscriptions      PushSubscription[]
+  logEntries             VehicleLogEntry[]
 }
 
 model NotificationPreference {
@@ -78,6 +79,33 @@ model Vehicle {
   maintenanceRecords MaintenanceRecord[]
   mileageRecords     MileageRecord[]
   maintenancePlan    MaintenancePlanItem[]
+  logEntries         VehicleLogEntry[]
+}
+
+enum LogEntryType {
+  MAINTENANCE
+  REPAIR
+  INSPECTION
+  RECALL
+  MILEAGE_UPDATE
+  DOCUMENT
+  NOTE
+}
+
+model VehicleLogEntry {
+  id          String       @id @default(cuid())
+  vehicleId   String
+  vehicle     Vehicle      @relation(fields: [vehicleId], references: [id])
+  type        LogEntryType
+  date        DateTime
+  title       String
+  description String?
+  mileageAtEvent Int?
+  cost        Float?
+  documentUrl String?
+  createdBy   User?        @relation(fields: [createdById], references: [id])
+  createdById String?
+  createdAt   DateTime     @default(now())
 }
 
 model MileageRecord {
