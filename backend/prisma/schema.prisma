@@ -23,34 +23,61 @@ enum ContractType {
 }
 
 model User {
-  id                     String          @id @default(cuid())
-  email                  String          @unique
+  id                     String                   @id @default(cuid())
+  email                  String                   @unique
   password               String?
   role                   Role
-  emailVerified          Boolean         @default(false)
-  emailVerificationToken String?         @unique
-  passwordResetToken     String?         @unique
+  emailVerified          Boolean                  @default(false)
+  emailVerificationToken String?                  @unique
+  passwordResetToken     String?                  @unique
   passwordResetExpires   DateTime?
-  createdAt              DateTime        @default(now())
+  createdAt              DateTime                 @default(now())
   vehicles               Vehicle[]
   mileageRecords         MileageRecord[]
+  notificationPreference NotificationPreference?
+  pushSubscriptions      PushSubscription[]
+}
+
+model NotificationPreference {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  emailEnabled Boolean  @default(true)
+  pushEnabled  Boolean  @default(false)
+  remindJ30    Boolean  @default(true)
+  remindJ7     Boolean  @default(true)
+  remindJ1     Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, endpoint])
 }
 
 model Vehicle {
-  id                 String          @id @default(cuid())
-  vin                String          @unique
+  id                 String               @id @default(cuid())
+  vin                String               @unique
   brand              String
   model              String
   year               Int?
   licensePlate       String?
-  mileage            Int             // always reflects latest recorded value
-  initialMileage     Int             @default(0)
-  driver             User?           @relation(fields: [driverId], references: [id])
+  mileage            Int
+  initialMileage     Int                  @default(0)
+  driver             User?                @relation(fields: [driverId], references: [id])
   driverId           String?
-  createdAt          DateTime        @default(now())
+  createdAt          DateTime             @default(now())
   contracts          Contract[]
   maintenanceRecords MaintenanceRecord[]
   mileageRecords     MileageRecord[]
+  maintenancePlan    MaintenancePlanItem[]
 }
 
 model MileageRecord {
@@ -82,4 +109,20 @@ model MaintenanceRecord {
   invoiceUrl String?
   vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
   vehicleId  String
+}
+
+// One row per operation type per vehicle (oil change, brakes, timing belt…)
+// Stores the recurrence rule + last execution → system derives next due date/km
+model MaintenancePlanItem {
+  id              String    @id @default(cuid())
+  vehicleId       String
+  vehicle         Vehicle   @relation(fields: [vehicleId], references: [id])
+  operationType   String    // "Vidange", "Freins avant", "Courroie de distribution"…
+  intervalKm      Int?      // recur every X km  (null = time-only)
+  intervalMonths  Int?      // recur every X months (null = mileage-only)
+  lastDoneKm      Int?      // km reading when last performed
+  lastDoneDate    DateTime? // date when last performed
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }

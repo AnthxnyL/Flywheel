@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { Car, Calendar, FileText, Gauge, Plus } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
+import MaintenancePlanDriver from '../../components/MaintenancePlanDriver'
+import NotificationSettings from '../../components/NotificationSettings'
+import { registerServiceWorker } from '../../services/push'
 
 interface MileageRecord {
   id: string
@@ -36,6 +39,8 @@ export default function DriverDashboardPage() {
   const [submitting, setSubmitting] = useState(false)
   const [mileageError, setMileageError] = useState<string | null>(null)
   const [mileageSuccess, setMileageSuccess] = useState(false)
+
+  useEffect(() => { registerServiceWorker().catch(() => null) }, [])
 
   async function loadVehicles() {
     api.get<Vehicle[]>('/vehicles/mine')
@@ -267,6 +272,12 @@ export default function DriverDashboardPage() {
                 </div>
               </div>
             )}
+
+            {/* Maintenance plan (read-only) */}
+            <MaintenancePlanDriver vehicleId={vehicle.id} />
+
+            {/* Notification preferences */}
+            <NotificationSettings />
           </div>
         )}
       </main>
