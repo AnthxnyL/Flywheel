@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { VehiclesService } from './vehicles.service'
+import { VinDecoderService } from './vin-decoder.service'
 import { CreateVehicleDto } from './dto/create-vehicle.dto'
 import { UpdateVehicleDto } from './dto/update-vehicle.dto'
 import { AssignVehicleDto } from './dto/assign-vehicle.dto'
@@ -23,7 +24,18 @@ type JwtUser = { id: string; email: string; role: string }
 @Controller('vehicles')
 @UseGuards(JwtAuthGuard)
 export class VehiclesController {
-  constructor(private vehicles: VehiclesService) {}
+  constructor(
+    private vehicles: VehiclesService,
+    private vinDecoder: VinDecoderService,
+  ) {}
+
+  // DEALER: decode a VIN before creating the vehicle
+  @Get('decode-vin/:vin')
+  @UseGuards(RolesGuard)
+  @Roles('DEALER')
+  decodeVin(@Param('vin') vin: string) {
+    return this.vinDecoder.decode(vin)
+  }
 
   // DEALER: list all vehicles in the fleet
   @Get()
