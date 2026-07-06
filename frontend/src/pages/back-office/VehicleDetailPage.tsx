@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Car, User, Link2, Link2Off, AlertCircle, CheckCircle2, Gauge, Plus } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
+import MaintenancePlanDealer from '../../components/MaintenancePlanDealer'
 
 interface MileageRecord {
   id: string
@@ -327,6 +328,9 @@ export default function VehicleDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Maintenance plan */}
+            <MaintenancePlanDealer vehicleId={vehicle.id} currentMileage={vehicle.mileage} />
           </div>
 
           {/* Right: client + contracts */}

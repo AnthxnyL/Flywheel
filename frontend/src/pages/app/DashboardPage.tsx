@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Car, Calendar, FileText, Gauge, Plus } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
+import MaintenancePlanDriver from '../../components/MaintenancePlanDriver'
 
 interface MileageRecord {
   id: string
@@ -267,6 +268,9 @@ export default function DriverDashboardPage() {
                 </div>
               </div>
             )}
+
+            {/* Maintenance plan (read-only) */}
+            <MaintenancePlanDriver vehicleId={vehicle.id} />
           </div>
         )}
       </main>
