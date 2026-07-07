@@ -8,6 +8,7 @@ import { VehiclesModule } from './vehicles/vehicles.module';
 import { MaintenancePlanModule } from './maintenance-plan/maintenance-plan.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { LogbookModule } from './logbook/logbook.module';
+import { InvoicesModule } from './invoices/invoices.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -20,6 +21,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     MaintenancePlanModule,
     NotificationsModule,
     LogbookModule,
+    InvoicesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
