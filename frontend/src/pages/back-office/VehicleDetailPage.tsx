@@ -4,6 +4,7 @@ import { ArrowLeft, Car, User, Link2, Link2Off, AlertCircle, CheckCircle2, Gauge
 import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
 import MaintenancePlanDealer from '../../components/MaintenancePlanDealer'
+import Invoices from '../../components/Invoices'
 import { BookOpen } from 'lucide-react'
 
 interface MileageRecord {
@@ -341,6 +342,15 @@ export default function VehicleDetailPage() {
 
             {/* Maintenance plan */}
             <MaintenancePlanDealer vehicleId={vehicle.id} currentMileage={vehicle.mileage} />
+
+            {/* Invoices */}
+            <Invoices
+              vehicleId={vehicle.id}
+              canUpload={true}
+              canDelete={true}
+              userRole="DEALER"
+              userId={user?.id}
+            />
           </div>
 
           {/* Right: client + contracts */}

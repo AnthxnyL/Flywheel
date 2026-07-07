@@ -5,6 +5,7 @@ import api from '../../services/api'
 import MaintenancePlanDriver from '../../components/MaintenancePlanDriver'
 import NotificationSettings from '../../components/NotificationSettings'
 import LogbookDriver from './LogbookPage'
+import Invoices from '../../components/Invoices'
 import { registerServiceWorker } from '../../services/push'
 
 interface MileageRecord {
@@ -276,6 +277,15 @@ export default function DriverDashboardPage() {
 
             {/* Maintenance plan (read-only) */}
             <MaintenancePlanDriver vehicleId={vehicle.id} />
+
+            {/* Invoices */}
+            <Invoices
+              vehicleId={vehicle.id}
+              canUpload={true}
+              canDelete={true}
+              userRole="DRIVER"
+              userId={user?.id}
+            />
 
             {/* Logbook */}
             <LogbookDriver vehicleId={vehicle.id} />
