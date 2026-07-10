@@ -360,28 +360,9 @@ export default function DriverDashboardPage() {
                   </div>
                 </div>
               </div>
-            )}
-
-            {/* Maintenance plan (read-only) */}
-            <MaintenancePlanDriver vehicleId={vehicle.id} />
-
-            {/* Invoices */}
-            <Invoices
-              vehicleId={vehicle.id}
-              canUpload={true}
-              canDelete={true}
-              userRole="DRIVER"
-              userId={user?.id}
-            />
-
-            {/* Logbook */}
-            <LogbookDriver vehicleId={vehicle.id} />
-
-            {/* Notification preferences */}
-            <NotificationSettings />
-          </div>
-        )}
-      </main>
+            ))}
+        </div>
+      </div>
 
       {/* Mileage modal */}
       {showMileage && vehicle && (
