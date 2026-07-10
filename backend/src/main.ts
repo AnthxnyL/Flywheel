@@ -11,9 +11,21 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
 
+  const allowedOrigins = [
+    process.env.APP_URL ?? 'http://localhost:5173',
+    'http://localhost:5173',
+    /https:\/\/flywheel.*\.vercel\.app$/,
+  ]
+
   app.enableCors({
-    origin: process.env.APP_URL ?? 'http://localhost:5173',
-    credentials: true, // required to accept cookies cross-origin in dev
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true)
+      const allowed = allowedOrigins.some(o =>
+        typeof o === 'string' ? o === origin : o.test(origin)
+      )
+      cb(allowed ? null : new Error('Not allowed by CORS'), allowed)
+    },
+    credentials: true,
   });
 
   await app.listen(process.env.PORT ?? 3000);
