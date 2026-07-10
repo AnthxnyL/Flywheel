@@ -20,7 +20,7 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
 
   const sub = await reg.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(publicKey),
+    applicationServerKey: urlBase64ToUint8Array(publicKey) as unknown as BufferSource,
   })
 
   const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Plus, Wrench, Gauge, FileText, AlertTriangle,
-  ClipboardList, BookOpen, Trash2, ExternalLink, ChevronDown,
+  ClipboardList, BookOpen, Trash2, ExternalLink,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'

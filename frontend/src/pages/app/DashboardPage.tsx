@@ -4,7 +4,6 @@ import api from '../../services/api'
 import MaintenancePlanDriver from '../../components/MaintenancePlanDriver'
 import NotificationSettings from '../../components/NotificationSettings'
 import LogbookDriver from './LogbookPage'
-import Invoices from '../../components/Invoices'
 import { registerServiceWorker } from '../../services/push'
 import { X } from 'lucide-react'
 

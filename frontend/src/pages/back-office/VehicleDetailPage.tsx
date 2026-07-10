@@ -5,7 +5,6 @@ import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
 import MaintenancePlanDealer from '../../components/MaintenancePlanDealer'
 import Invoices from '../../components/Invoices'
-import { BookOpen } from 'lucide-react'
 
 interface MileageRecord {
   id: string

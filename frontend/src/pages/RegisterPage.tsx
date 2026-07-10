@@ -1,5 +1,6 @@
-import { FormEvent, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import type { FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 function validatePassword(p: string): string {
@@ -11,7 +12,7 @@ function validatePassword(p: string): string {
 
 export default function RegisterPage() {
   const { register } = useAuth()
-  const navigate = useNavigate()
+
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
