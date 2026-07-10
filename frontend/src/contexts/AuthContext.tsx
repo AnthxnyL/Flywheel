@@ -61,7 +61,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (err) => {
         const original = err.config
         // Retry once with a fresh access token if we get a 401 (expired token)
-        if (err.response?.status === 401 && !original._retry) {
+        const isRefreshCall = original.url?.includes('/auth/refresh')
+        if (err.response?.status === 401 && !original._retry && !isRefreshCall) {
           original._retry = true
           try {
             const { data } = await api.post('/auth/refresh')
