@@ -156,7 +156,7 @@ export default function NotificationSettings() {
               onClick={() => toggle(d.key)}
               className={`flex flex-col items-center gap-1 py-3 px-2 rounded-lg border text-center transition ${
                 prefs[d.key]
-                  ? 'border-[var(--color-primary)] bg-blue-50'
+                  ? 'border-[var(--color-primary)] bg-green-50'
                   : 'border-[var(--color-border)] hover:bg-gray-50'
               }`}
             >
