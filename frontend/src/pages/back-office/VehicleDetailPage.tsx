@@ -4,6 +4,8 @@ import { X, Plus, Link2, Link2Off } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
 import MaintenancePlanDealer from '../../components/MaintenancePlanDealer'
+import Invoices from '../../components/Invoices'
+import { BookOpen } from 'lucide-react'
 
 interface MileageRecord {
   id: string
@@ -376,6 +378,18 @@ export default function VehicleDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Maintenance plan */}
+            <MaintenancePlanDealer vehicleId={vehicle.id} currentMileage={vehicle.mileage} />
+
+            {/* Invoices */}
+            <Invoices
+              vehicleId={vehicle.id}
+              canUpload={true}
+              canDelete={true}
+              userRole="DEALER"
+              userId={user?.id}
+            />
           </div>
         )}
 

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common'
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { UploadInvoiceDto } from './dto/upload-invoice.dto'
 import * as fs from 'fs'
@@ -8,7 +12,13 @@ import * as path from 'path'
 export class InvoicesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(vehicleId: string, file: Express.Multer.File, dto: UploadInvoiceDto, uploadedById: string) {
+  async create(
+    vehicleId: string,
+    file: Express.Multer.File,
+    dto: UploadInvoiceDto,
+    uploadedById: string,
+  ) {
+    // Verify vehicle exists and driver owns it (or is DEALER — checked at controller level)
     const vehicle = await this.prisma.vehicle.findUnique({ where: { id: vehicleId } })
     if (!vehicle) throw new NotFoundException('Véhicule introuvable.')
 
@@ -43,11 +53,15 @@ export class InvoicesService {
 
   async delete(id: string, requesterId: string, requesterRole: string) {
     const invoice = await this.findOne(id)
+
+    // DEALER can delete any invoice; DRIVER can only delete their own
     if (requesterRole !== 'DEALER' && invoice.uploadedById !== requesterId) {
       throw new ForbiddenException('Vous ne pouvez pas supprimer cette facture.')
     }
+
     const filePath = path.join(process.cwd(), 'uploads', invoice.storedName)
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
+
     return this.prisma.invoice.delete({ where: { id } })
   }
 }

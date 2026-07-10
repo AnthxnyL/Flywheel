@@ -37,6 +37,7 @@ model User {
   notificationPreference NotificationPreference?
   pushSubscriptions      PushSubscription[]
   logEntries             VehicleLogEntry[]
+  invoices               Invoice[]
 }
 
 model NotificationPreference {
@@ -80,6 +81,7 @@ model Vehicle {
   mileageRecords     MileageRecord[]
   maintenancePlan    MaintenancePlanItem[]
   logEntries         VehicleLogEntry[]
+  invoices           Invoice[]
 }
 
 enum LogEntryType {
@@ -141,6 +143,22 @@ model MaintenanceRecord {
 
 // One row per operation type per vehicle (oil change, brakes, timing belt…)
 // Stores the recurrence rule + last execution → system derives next due date/km
+model Invoice {
+  id           String   @id @default(cuid())
+  vehicleId    String
+  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id])
+  uploadedById String?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id])
+  label        String?
+  invoiceDate  DateTime?
+  amount       Float?
+  filename     String
+  storedName   String
+  mimeType     String
+  size         Int
+  createdAt    DateTime @default(now())
+}
+
 model MaintenancePlanItem {
   id              String    @id @default(cuid())
   vehicleId       String

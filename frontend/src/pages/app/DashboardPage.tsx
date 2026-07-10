@@ -4,6 +4,7 @@ import api from '../../services/api'
 import MaintenancePlanDriver from '../../components/MaintenancePlanDriver'
 import NotificationSettings from '../../components/NotificationSettings'
 import LogbookDriver from './LogbookPage'
+import Invoices from '../../components/Invoices'
 import { registerServiceWorker } from '../../services/push'
 import { X } from 'lucide-react'
 
@@ -359,10 +360,28 @@ export default function DriverDashboardPage() {
                   </div>
                 </div>
               </div>
-            )
-          )}
-        </div>
-      </div>
+            )}
+
+            {/* Maintenance plan (read-only) */}
+            <MaintenancePlanDriver vehicleId={vehicle.id} />
+
+            {/* Invoices */}
+            <Invoices
+              vehicleId={vehicle.id}
+              canUpload={true}
+              canDelete={true}
+              userRole="DRIVER"
+              userId={user?.id}
+            />
+
+            {/* Logbook */}
+            <LogbookDriver vehicleId={vehicle.id} />
+
+            {/* Notification preferences */}
+            <NotificationSettings />
+          </div>
+        )}
+      </main>
 
       {/* Mileage modal */}
       {showMileage && vehicle && (

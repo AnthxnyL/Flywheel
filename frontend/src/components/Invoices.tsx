@@ -16,8 +16,8 @@ interface Invoice {
 
 interface Props {
   vehicleId: string
-  canUpload: boolean
-  canDelete: boolean
+  canUpload: boolean   // true = DRIVER
+  canDelete: boolean   // true = DRIVER (own) or DEALER
   userRole: 'DRIVER' | 'DEALER' | 'BRAND'
   userId?: string
 }
@@ -35,6 +35,7 @@ export default function Invoices({ vehicleId, canUpload, canDelete, userRole, us
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
 
+  // Upload form state
   const [label, setLabel] = useState('')
   const [invoiceDate, setInvoiceDate] = useState('')
   const [amount, setAmount] = useState('')
@@ -116,6 +117,7 @@ export default function Invoices({ vehicleId, canUpload, canDelete, userRole, us
       const url = URL.createObjectURL(new Blob([res.data], { type: invoice.mimeType }))
       const a = document.createElement('a')
       a.href = url
+      // PDFs open inline, images download
       if (invoice.mimeType === 'application/pdf') {
         a.target = '_blank'
         a.rel = 'noopener'
@@ -125,12 +127,13 @@ export default function Invoices({ vehicleId, canUpload, canDelete, userRole, us
       a.click()
       setTimeout(() => URL.revokeObjectURL(url), 60_000)
     } catch {
-      setError("Impossible d'ouvrir ce fichier.")
+      setError('Impossible d\'ouvrir ce fichier.')
     }
   }
 
   return (
     <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+      {/* Header */}
       <div className="px-5 py-4 border-b border-[var(--color-border)] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Receipt size={18} className="text-[var(--color-primary)]" />
@@ -153,12 +156,14 @@ export default function Invoices({ vehicleId, canUpload, canDelete, userRole, us
         )}
       </div>
 
+      {/* Upload form */}
       {showForm && (
         <div className="p-5 border-b border-[var(--color-border)] bg-gray-50">
           <form onSubmit={handleUpload} className="space-y-4">
+            {/* Drop zone */}
             <div
               className={`relative border-2 border-dashed rounded-xl p-6 text-center transition cursor-pointer ${
-                drag ? 'border-[var(--color-primary)] bg-green-50' : 'border-[var(--color-border)] hover:border-[var(--color-primary)]'
+                drag ? 'border-[var(--color-primary)] bg-blue-50' : 'border-[var(--color-border)] hover:border-[var(--color-primary)]'
               }`}
               onDragOver={e => { e.preventDefault(); setDrag(true) }}
               onDragLeave={() => setDrag(false)}
@@ -176,7 +181,7 @@ export default function Invoices({ vehicleId, canUpload, canDelete, userRole, us
                 <div className="flex items-center justify-center gap-3">
                   {file.type === 'application/pdf'
                     ? <FileText size={28} className="text-red-500" />
-                    : <Image size={28} className="text-green-600" />
+                    : <Image size={28} className="text-blue-500" />
                   }
                   <div className="text-left">
                     <p className="text-sm font-medium text-[var(--color-text-primary)] truncate max-w-xs">{file.name}</p>
@@ -194,6 +199,7 @@ export default function Invoices({ vehicleId, canUpload, canDelete, userRole, us
               )}
             </div>
 
+            {/* Metadata */}
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <label className="block text-xs font-medium text-[var(--color-text-primary)] mb-1">Libellé</label>
@@ -254,6 +260,7 @@ export default function Invoices({ vehicleId, canUpload, canDelete, userRole, us
         </div>
       )}
 
+      {/* List */}
       {loading ? (
         <div className="p-8 text-center text-[var(--color-text-secondary)] text-sm">Chargement…</div>
       ) : invoices.length === 0 && !showForm ? (
@@ -277,13 +284,15 @@ export default function Invoices({ vehicleId, canUpload, canDelete, userRole, us
             const canDel = canDelete && (userRole === 'DEALER' || inv.uploadedBy?.id === userId)
             return (
               <li key={inv.id} className="px-5 py-4 flex items-center gap-4 hover:bg-gray-50 transition">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isPdf ? 'bg-red-50' : 'bg-green-50'}`}>
+                {/* Icon */}
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isPdf ? 'bg-red-50' : 'bg-blue-50'}`}>
                   {isPdf
                     ? <FileText size={20} className="text-red-500" />
-                    : <Image size={20} className="text-green-600" />
+                    : <Image size={20} className="text-blue-500" />
                   }
                 </div>
 
+                {/* Info */}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">
                     {inv.label || inv.filename}
@@ -301,11 +310,14 @@ export default function Invoices({ vehicleId, canUpload, canDelete, userRole, us
                     )}
                     <span className="text-xs text-[var(--color-text-secondary)]">{formatBytes(inv.size)}</span>
                     {userRole === 'DEALER' && inv.uploadedBy && (
-                      <span className="text-xs text-[var(--color-text-secondary)]">par {inv.uploadedBy.email}</span>
+                      <span className="text-xs text-[var(--color-text-secondary)]">
+                        par {inv.uploadedBy.email}
+                      </span>
                     )}
                   </div>
                 </div>
 
+                {/* Actions */}
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={() => openFile(inv)}
