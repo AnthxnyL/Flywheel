@@ -59,7 +59,7 @@ export default function ActivatePage() {
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4">
       <div className="w-full max-w-md bg-[var(--color-surface)] rounded-2xl shadow-sm border border-[var(--color-border)] p-8">
         <div className="mb-8 text-center">
-          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
             <span className="text-[var(--color-primary)] text-xl">🔑</span>
           </div>
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Activez votre compte</h1>

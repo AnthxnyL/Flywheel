@@ -15,7 +15,7 @@ interface TimelineEvent {
 }
 
 const TYPE_META: Record<string, { label: string; icon: React.ElementType; colors: string }> = {
-  MAINTENANCE:    { label: 'Entretien',             icon: Wrench,       colors: 'bg-blue-100 text-blue-700' },
+  MAINTENANCE:    { label: 'Entretien',             icon: Wrench,       colors: 'bg-green-100 text-green-700' },
   REPAIR:         { label: 'Réparation',            icon: Wrench,       colors: 'bg-orange-100 text-orange-700' },
   INSPECTION:     { label: 'Contrôle technique',    icon: ClipboardList,colors: 'bg-purple-100 text-purple-700' },
   RECALL:         { label: 'Rappel constructeur',   icon: AlertTriangle,colors: 'bg-red-100 text-red-700' },
@@ -95,7 +95,7 @@ export default function LogbookDriver({ vehicleId }: Props) {
                             </div>
                             {event.documentUrl && (
                               <a href={event.documentUrl} target="_blank" rel="noopener noreferrer"
-                                 className="shrink-0 p-1 rounded text-[var(--color-primary)] hover:bg-blue-50 transition">
+                                 className="shrink-0 p-1 rounded text-[var(--color-primary)] hover:bg-green-50 transition">
                                 <ExternalLink size={13} />
                               </a>
                             )}

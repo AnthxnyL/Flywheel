@@ -281,7 +281,7 @@ export default function MaintenancePlanDealer({ vehicleId, currentMileage }: Pro
                         key={p.label}
                         type="button"
                         onClick={() => applyPreset(p)}
-                        className="text-left text-sm px-3 py-2 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:bg-blue-50 transition"
+                        className="text-left text-sm px-3 py-2 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:bg-green-50 transition"
                       >
                         <span className="font-medium">{p.label}</span>
                         <span className="text-[var(--color-text-secondary)] ml-2 text-xs">

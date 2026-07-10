@@ -1,8 +1,20 @@
 import { FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { UserPlus } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
+
+function FlywheelLogo() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="8.5" stroke="#2DBD7A" strokeWidth="2"/>
+      <line x1="12" y1="3.5" x2="12" y2="12" stroke="#2DBD7A" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="19.07" y1="16.5" x2="12" y2="12" stroke="#2DBD7A" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="4.93" y1="16.5" x2="12" y2="12" stroke="#2DBD7A" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="12" cy="12" r="2" fill="#2DBD7A"/>
+    </svg>
+  )
+}
 
 export default function DealerDashboardPage() {
   const { user, logout } = useAuth()
@@ -31,136 +43,137 @@ export default function DealerDashboardPage() {
     }
   }
 
+  const displayName = user?.email?.split('@')[0] ?? 'Concessionnaire'
+  const initials = (user?.email ?? 'JP').slice(0, 2).toUpperCase()
+
   return (
-    <div className="min-h-screen bg-[var(--color-background)]">
-      <header className="bg-[var(--color-surface)] border-b border-[var(--color-border)] px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold text-[var(--color-text-primary)]">Flywheel</h1>
-            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Back-office</span>
+    <div style={{ minHeight: '100vh', background: 'var(--fw-bg)', fontFamily: "'Inter', system-ui, sans-serif" }}>
+
+      {/* TOP NAV */}
+      <header style={{ height: 64, background: 'white', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', padding: '0 28px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginRight: 44 }}>
+          <div style={{ width: 32, height: 32, background: 'var(--fw-sidebar)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <FlywheelLogo />
           </div>
-          <nav className="flex items-center gap-1 ml-4">
-            <Link to="/back-office/dashboard" className="text-sm font-medium text-[var(--color-primary)] bg-blue-50 px-3 py-1.5 rounded-md">
-              Tableau de bord
-            </Link>
-            <Link to="/back-office/fleet" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] px-3 py-1.5 rounded-md hover:bg-gray-100 transition">
-              Flotte
-            </Link>
-          </nav>
+          <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 18, color: 'var(--fw-text)', letterSpacing: '-0.3px' }}>flywheel</span>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-[var(--color-text-secondary)]">{user?.email}</span>
-          <button
-            onClick={logout}
-            className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition"
-          >
-            Déconnexion
-          </button>
+        <nav style={{ display: 'flex', gap: 2, flex: 1 }}>
+          <div style={{ padding: '7px 14px', borderRadius: 7, background: 'var(--fw-bg)', fontSize: 13, fontWeight: 600, color: 'var(--fw-text)' }}>Tableau de bord</div>
+          <Link to="/back-office/fleet" style={{ padding: '7px 14px', borderRadius: 7, fontSize: 13, fontWeight: 500, color: 'var(--fw-text-2)', textDecoration: 'none' }}>Flotte</Link>
+        </nav>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--fw-text)' }}>{displayName}</div>
+            <div style={{ fontSize: 11, color: 'var(--fw-text-2)' }}>{user?.email}</div>
+          </div>
+          <div onClick={logout} title="Déconnexion" style={{ width: 36, height: 36, background: 'var(--fw-sidebar)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: 12, color: 'white', cursor: 'pointer' }}>
+            {initials}
+          </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-6">
+      <div style={{ padding: '22px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+        {/* Page header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
           <div>
-            <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">Tableau de bord</h2>
-            <p className="text-[var(--color-text-secondary)] mt-1">Gérez vos clients et interventions.</p>
+            <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 22, color: 'var(--fw-text)', letterSpacing: '-0.3px' }}>Tableau de bord</div>
+            <div style={{ fontSize: 12, color: 'var(--fw-text-2)', marginTop: 2 }}>Bienvenue — gérez vos clients et la flotte de véhicules.</div>
           </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-white text-sm transition"
-            style={{ backgroundColor: 'var(--color-primary)' }}
-          >
-            <UserPlus size={16} />
+          <div style={{ flex: 1 }} />
+          <button onClick={() => setShowForm(true)}
+            style={{ fontSize: 13, fontWeight: 600, color: 'white', background: 'var(--fw-green)', border: 'none', padding: '9px 18px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="white" strokeWidth="2.5" strokeLinecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/></svg>
             Ajouter un client
           </button>
         </div>
 
         {feedback && (
-          <div className={`mb-6 p-4 rounded-lg border text-sm ${
-            feedback.type === 'success'
-              ? 'bg-green-50 border-green-200 text-green-700'
-              : 'bg-red-50 border-red-200 text-red-700'
-          }`}>
+          <div style={{ padding: '10px 16px', borderRadius: 10, fontSize: 13, background: feedback.type === 'success' ? 'var(--fw-green-tint)' : 'var(--fw-danger-tint)', border: `1px solid ${feedback.type === 'success' ? '#a7f3d0' : '#fca5a5'}`, color: feedback.type === 'success' ? '#1A7A4A' : '#B01C1C' }}>
             {feedback.msg}
           </div>
         )}
 
-        {/* Add client modal */}
-        {showForm && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-            <div className="bg-[var(--color-surface)] rounded-2xl shadow-xl border border-[var(--color-border)] p-6 w-full max-w-md">
-              <h3 className="text-lg font-bold text-[var(--color-text-primary)] mb-1">Ajouter un client</h3>
-              <p className="text-sm text-[var(--color-text-secondary)] mb-5">
-                Un email d'activation sera envoyé au client pour qu'il définisse son mot de passe.
-              </p>
-
-              <form onSubmit={handleCreateClient} className="space-y-4" noValidate>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Prénom</label>
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition text-sm"
-                      placeholder="Jean"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Nom</label>
-                    <input
-                      type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition text-sm"
-                      placeholder="Dupont"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Email *</label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition text-sm"
-                    placeholder="client@exemple.fr"
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowForm(false)}
-                    className="flex-1 py-2 rounded-lg border border-[var(--color-border)] text-sm font-medium text-[var(--color-text-secondary)] hover:bg-gray-50 transition"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading || !email}
-                    className="flex-1 py-2 rounded-lg font-medium text-white text-sm transition disabled:opacity-60"
-                    style={{ backgroundColor: 'var(--color-primary)' }}
-                  >
-                    {loading ? 'Envoi…' : "Envoyer l'invitation"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {['Véhicules en atelier', 'Interventions du jour', 'Clients actifs'].map((label) => (
-            <div key={label} className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-5">
-              <p className="text-sm text-[var(--color-text-muted)]">{label}</p>
-              <p className="text-2xl font-bold text-[var(--color-text-primary)] mt-1">—</p>
+        {/* KPI cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+          {[
+            { label: 'Véhicules en flotte', value: '—', sub: 'Total enregistrés', icon: '🚗' },
+            { label: 'Alertes actives', value: '—', sub: 'Maintenance urgente', icon: '⚠️' },
+            { label: 'Clients actifs', value: '—', sub: 'Comptes activés', icon: '👥' },
+          ].map(({ label, value, sub, icon }) => (
+            <div key={label} style={{ background: 'white', borderRadius: 12, padding: '18px 20px', boxShadow: 'var(--fw-shadow-sm)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--fw-text-3)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</div>
+                <span style={{ fontSize: 16 }}>{icon}</span>
+              </div>
+              <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 30, color: 'var(--fw-text)', letterSpacing: '-0.5px', lineHeight: 1 }}>{value}</div>
+              <div style={{ fontSize: 11, color: 'var(--fw-text-3)', marginTop: 6 }}>{sub}</div>
             </div>
           ))}
         </div>
-      </main>
+
+        {/* Quick actions */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <Link to="/back-office/fleet" style={{ background: 'white', borderRadius: 12, padding: '18px 22px', boxShadow: 'var(--fw-shadow-sm)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 46, height: 46, background: 'var(--fw-bg)', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>🚗</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: 14, color: 'var(--fw-text)', marginBottom: 3 }}>Gérer la flotte</div>
+              <div style={{ fontSize: 12, color: 'var(--fw-text-2)' }}>Véhicules, assignations, alertes maintenance</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--fw-green)', fontWeight: 500, flexShrink: 0 }}>Accéder →</div>
+          </Link>
+          <div onClick={() => setShowForm(true)} style={{ background: 'white', borderRadius: 12, padding: '18px 22px', boxShadow: 'var(--fw-shadow-sm)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 46, height: 46, background: 'var(--fw-green-tint)', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>👤</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: 14, color: 'var(--fw-text)', marginBottom: 3 }}>Inviter un client</div>
+              <div style={{ fontSize: 12, color: 'var(--fw-text-2)' }}>Envoyer un lien d'activation par email</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--fw-green)', fontWeight: 500, flexShrink: 0 }}>Inviter →</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Add client modal */}
+      {showForm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,17,16,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(3px)' }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: 32, width: 500, boxShadow: '0 24px 64px rgba(0,0,0,0.22)', animation: 'fw-scaleIn 0.18s ease' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 22 }}>
+              <div>
+                <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 20, color: 'var(--fw-text)', letterSpacing: '-0.2px' }}>Ajouter un client</div>
+                <div style={{ fontSize: 12, color: 'var(--fw-text-2)', marginTop: 3 }}>Un email d'activation sera envoyé automatiquement au client.</div>
+              </div>
+              <button onClick={() => setShowForm(false)} style={{ width: 32, height: 32, background: 'var(--fw-bg)', border: 'none', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <X size={13} color="var(--fw-text)" />
+              </button>
+            </div>
+            <form onSubmit={handleCreateClient} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--fw-text)', display: 'block', marginBottom: 7 }}>Prénom</label>
+                  <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jean"
+                    style={{ width: '100%', fontSize: 13, color: 'var(--fw-text)', background: 'var(--fw-bg)', border: '1.5px solid rgba(0,0,0,0.1)', borderRadius: 8, padding: '10px 12px', outline: 'none', boxSizing: 'border-box' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--fw-text)', display: 'block', marginBottom: 7 }}>Nom</label>
+                  <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Dupont"
+                    style={{ width: '100%', fontSize: 13, color: 'var(--fw-text)', background: 'var(--fw-bg)', border: '1.5px solid rgba(0,0,0,0.1)', borderRadius: 8, padding: '10px 12px', outline: 'none', boxSizing: 'border-box' }} />
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--fw-text)', display: 'block', marginBottom: 7 }}>Email *</label>
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="client@exemple.fr"
+                  style={{ width: '100%', fontSize: 13, color: 'var(--fw-text)', background: 'var(--fw-bg)', border: '1.5px solid rgba(0,0,0,0.1)', borderRadius: 8, padding: '10px 12px', outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 4 }}>
+                <button type="button" onClick={() => setShowForm(false)} style={{ fontSize: 13, fontWeight: 500, color: 'var(--fw-text)', background: 'var(--fw-bg)', border: 'none', padding: '10px 20px', borderRadius: 8, cursor: 'pointer' }}>Annuler</button>
+                <button type="submit" disabled={loading || !email} style={{ fontSize: 13, fontWeight: 600, color: 'white', background: 'var(--fw-green)', border: 'none', padding: '10px 22px', borderRadius: 8, cursor: 'pointer', opacity: loading || !email ? 0.6 : 1 }}>
+                  {loading ? 'Envoi…' : "Envoyer l'invitation →"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

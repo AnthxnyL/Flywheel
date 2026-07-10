@@ -82,7 +82,7 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* Role is fixed to DEALER — drivers are invited by their dealer */}
           <div>
-            <div className="p-3 rounded-lg border-2 border-[var(--color-primary)] bg-blue-50">
+            <div className="p-3 rounded-lg border-2 border-[var(--color-primary)] bg-green-50">
               <p className="font-medium text-sm text-[var(--color-text-primary)]">Concessionnaire</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Accès au back-office atelier</p>
             </div>
