@@ -33,9 +33,9 @@ export default function DealerDashboardPage() {
     setFeedback(null)
     try {
       await api.post('/auth/clients', { email, firstName, lastName })
-      setFeedback({ type: 'success', msg: `Lien d'activation envoyé à ${email}` })
       setEmail(''); setFirstName(''); setLastName('')
       setShowForm(false)
+      setFeedback({ type: 'success', msg: `Lien d'activation envoyé à ${email}` })
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
       setFeedback({ type: 'error', msg: msg ?? 'Une erreur est survenue' })
@@ -82,7 +82,7 @@ export default function DealerDashboardPage() {
             <div style={{ fontSize: 12, color: 'var(--fw-text-2)', marginTop: 2 }}>Bienvenue — gérez vos clients et la flotte de véhicules.</div>
           </div>
           <div style={{ flex: 1 }} />
-          <button onClick={() => setShowForm(true)}
+          <button onClick={() => { setShowForm(true); setFeedback(null) }}
             style={{ fontSize: 13, fontWeight: 600, color: 'white', background: 'var(--fw-green)', border: 'none', padding: '9px 18px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="white" strokeWidth="2.5" strokeLinecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/></svg>
             Ajouter un client
@@ -123,7 +123,7 @@ export default function DealerDashboardPage() {
             </div>
             <div style={{ fontSize: 13, color: 'var(--fw-green)', fontWeight: 500, flexShrink: 0 }}>Accéder →</div>
           </Link>
-          <div onClick={() => setShowForm(true)} style={{ background: 'white', borderRadius: 12, padding: '18px 22px', boxShadow: 'var(--fw-shadow-sm)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div onClick={() => { setShowForm(true); setFeedback(null) }} style={{ background: 'white', borderRadius: 12, padding: '18px 22px', boxShadow: 'var(--fw-shadow-sm)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{ width: 46, height: 46, background: 'var(--fw-green-tint)', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>👤</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: 14, color: 'var(--fw-text)', marginBottom: 3 }}>Inviter un client</div>
@@ -136,8 +136,8 @@ export default function DealerDashboardPage() {
 
       {/* Add client modal */}
       {showForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,17,16,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(3px)', padding: '16px' }}>
-          <div style={{ background: 'white', borderRadius: 16, padding: 32, width: '100%', maxWidth: 500, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,0.22)', animation: 'fw-scaleIn 0.18s ease' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,17,16,0.55)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(3px)', padding: '40px 16px 16px' }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: 32, width: '100%', maxWidth: 500, boxShadow: '0 24px 64px rgba(0,0,0,0.22)', animation: 'fw-scaleIn 0.18s ease' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 22 }}>
               <div>
                 <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 20, color: 'var(--fw-text)', letterSpacing: '-0.2px' }}>Ajouter un client</div>
@@ -147,6 +147,11 @@ export default function DealerDashboardPage() {
                 <X size={13} color="var(--fw-text)" />
               </button>
             </div>
+            {feedback?.type === 'error' && (
+              <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, fontSize: 13, background: 'var(--fw-danger-tint)', border: '1px solid #fca5a5', color: '#B01C1C' }}>
+                {feedback.msg}
+              </div>
+            )}
             <form onSubmit={handleCreateClient} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div>
@@ -167,7 +172,7 @@ export default function DealerDashboardPage() {
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 4 }}>
                 <button type="button" onClick={() => setShowForm(false)} style={{ fontSize: 13, fontWeight: 500, color: 'var(--fw-text)', background: 'var(--fw-bg)', border: 'none', padding: '10px 20px', borderRadius: 8, cursor: 'pointer' }}>Annuler</button>
-                <button type="submit" disabled={loading || !email} style={{ fontSize: 13, fontWeight: 600, color: 'white', background: 'var(--fw-green)', border: 'none', padding: '10px 22px', borderRadius: 8, cursor: 'pointer', opacity: loading || !email ? 0.6 : 1 }}>
+                <button type="submit" disabled={loading || !email} style={{ fontSize: 13, fontWeight: 600, color: 'white', background: '#2DBD7A', border: 'none', padding: '10px 22px', borderRadius: 8, cursor: loading || !email ? 'not-allowed' : 'pointer', opacity: loading || !email ? 0.5 : 1 }}>
                   {loading ? 'Envoi…' : "Envoyer l'invitation →"}
                 </button>
               </div>

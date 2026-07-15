@@ -5,6 +5,25 @@
   Example: document.documentElement.style.setProperty('--color-primary', '#0066CC');
 */
 :root {
+  /* Flywheel design tokens */
+  --fw-green: #2DBD7A;
+  --fw-green-hover: #22a368;
+  --fw-green-tint: #EDFAF4;
+  --fw-warning: #E8970D;
+  --fw-warning-tint: #FEF6E7;
+  --fw-danger: #D93025;
+  --fw-danger-tint: #FEECEB;
+  --fw-info: #2563EB;
+  --fw-info-tint: #EEF3FD;
+  --fw-text: #111110;
+  --fw-text-2: #6B6B69;
+  --fw-text-3: #9E9E9B;
+  --fw-bg: #F7F6F4;
+  --fw-sidebar: #111110;
+  --fw-shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --fw-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+  /* Legacy aliases */
   --color-primary: #2DBD7A;
   --color-primary-hover: #22a368;
   --color-primary-foreground: #ffffff;
