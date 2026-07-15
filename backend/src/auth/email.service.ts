@@ -1,21 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import * as nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name)
-  private transporter: nodemailer.Transporter
+  private readonly resend: Resend
+  private readonly from: string
 
   constructor(private config: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      host: config.get('SMTP_HOST'),
-      port: config.get<number>('SMTP_PORT'),
-      auth: {
-        user: config.get('SMTP_USER'),
-        pass: config.get('SMTP_PASS'),
-      },
-    })
+    this.resend = new Resend(config.get('RESEND_API_KEY'))
+    this.from = config.get('SMTP_FROM') ?? 'noreply@flywheel.app'
   }
 
   async sendVerificationEmail(to: string, token: string) {
@@ -61,16 +56,16 @@ export class EmailService {
   }
 
   private async send(to: string, subject: string, html: string) {
-    try {
-      await this.transporter.sendMail({
-        from: this.config.get('SMTP_FROM'),
-        to,
-        subject,
-        html,
-      })
+    const { error } = await this.resend.emails.send({
+      from: this.from,
+      to,
+      subject,
+      html,
+    })
+    if (error) {
+      this.logger.error(`Failed to send email to ${to}: ${JSON.stringify(error)}`)
+    } else {
       this.logger.log(`Email sent to ${to}: ${subject}`)
-    } catch (err) {
-      this.logger.error(`Failed to send email to ${to}`, err)
     }
   }
 }
