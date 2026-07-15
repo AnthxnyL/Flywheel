@@ -18,7 +18,7 @@ async function bootstrap() {
   ]
 
   app.enableCors({
-    origin: (origin, cb) => {
+    origin: (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
       if (!origin) return cb(null, true)
       const allowed = allowedOrigins.some(o =>
         typeof o === 'string' ? o === origin : o.test(origin)
