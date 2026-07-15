@@ -68,6 +68,7 @@ export class EmailService {
         subject,
         html,
       })
+      this.logger.log(`Email sent to ${to}: ${subject}`)
     } catch (err) {
       this.logger.error(`Failed to send email to ${to}`, err)
     }
