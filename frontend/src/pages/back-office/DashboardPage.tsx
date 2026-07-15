@@ -136,8 +136,8 @@ export default function DealerDashboardPage() {
 
       {/* Add client modal */}
       {showForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,17,16,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(3px)' }}>
-          <div style={{ background: 'white', borderRadius: 16, padding: 32, width: 500, boxShadow: '0 24px 64px rgba(0,0,0,0.22)', animation: 'fw-scaleIn 0.18s ease' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,17,16,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(3px)', padding: '16px' }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: 32, width: '100%', maxWidth: 500, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,0.22)', animation: 'fw-scaleIn 0.18s ease' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 22 }}>
               <div>
                 <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 20, color: 'var(--fw-text)', letterSpacing: '-0.2px' }}>Ajouter un client</div>
