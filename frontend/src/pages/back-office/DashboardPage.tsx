@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { X } from 'lucide-react'
@@ -19,6 +19,12 @@ function FlywheelLogo() {
 
 export default function DealerDashboardPage() {
   const { user, logout } = useAuth()
+
+  const [stats, setStats] = useState<{ vehicleCount: number; clientCount: number; alertCount: number } | null>(null)
+
+  useEffect(() => {
+    api.get('/dashboard/stats').then(r => setStats(r.data)).catch(() => {})
+  }, [])
 
   const [showForm, setShowForm] = useState(false)
   const [email, setEmail] = useState('')
@@ -98,9 +104,9 @@ export default function DealerDashboardPage() {
         {/* KPI cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {[
-            { label: 'Véhicules en flotte', value: '—', sub: 'Total enregistrés', icon: '🚗' },
-            { label: 'Alertes actives', value: '—', sub: 'Maintenance urgente', icon: '⚠️' },
-            { label: 'Clients actifs', value: '—', sub: 'Comptes activés', icon: '👥' },
+            { label: 'Véhicules en flotte', value: stats ? String(stats.vehicleCount) : '—', sub: 'Total enregistrés', icon: '🚗' },
+            { label: 'Alertes actives', value: stats ? String(stats.alertCount) : '—', sub: 'Maintenance urgente', icon: '⚠️' },
+            { label: 'Clients actifs', value: stats ? String(stats.clientCount) : '—', sub: 'Comptes activés', icon: '👥' },
           ].map(({ label, value, sub, icon }) => (
             <div key={label} style={{ background: 'white', borderRadius: 12, padding: '18px 20px', boxShadow: 'var(--fw-shadow-sm)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
