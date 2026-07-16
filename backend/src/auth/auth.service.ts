@@ -66,13 +66,13 @@ export class AuthService {
 
     const tokens = this.generateTokens(user.id, user.email, user.role)
 
-    // Refresh token in httpOnly cookie — not readable by JS (XSS protection).
-    // SameSite=Strict means it won't be sent on cross-site requests (CSRF protection).
+    const isProd = process.env.NODE_ENV === 'production'
     res.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+      // cross-origin (Vercel → Render) requires SameSite=None + Secure in prod
+      sameSite: isProd ? 'none' : 'strict',
+      secure: isProd,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/auth/refresh',
     })
 
