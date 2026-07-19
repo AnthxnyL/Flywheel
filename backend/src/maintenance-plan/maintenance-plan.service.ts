@@ -7,7 +7,7 @@ import { MarkDoneDto } from './dto/mark-done.dto'
 export interface PlanItemWithStatus {
   id: string
   operationType: string
-  dueDate: Date | null
+  dueDate?: Date | null
   intervalKm: number | null
   intervalMonths: number | null
   lastDoneKm: number | null
@@ -23,7 +23,7 @@ export interface PlanItemWithStatus {
 type RawItem = {
   id: string
   operationType: string
-  dueDate: Date | null
+  dueDate?: Date | null
   intervalKm: number | null
   intervalMonths: number | null
   lastDoneKm: number | null
