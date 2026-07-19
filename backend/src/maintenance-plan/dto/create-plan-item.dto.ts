@@ -5,6 +5,10 @@ export class CreatePlanItemDto {
   operationType: string
 
   @IsOptional()
+  @IsDateString()
+  dueDate?: string
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   intervalKm?: number

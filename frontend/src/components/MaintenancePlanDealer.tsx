@@ -21,6 +21,7 @@ const PRESETS = [
 
 interface FormState {
   operationType: string
+  dueDate: string
   intervalKm: string
   intervalMonths: string
   lastDoneKm: string
@@ -29,7 +30,7 @@ interface FormState {
 }
 
 const EMPTY_FORM: FormState = {
-  operationType: '', intervalKm: '', intervalMonths: '',
+  operationType: '', dueDate: '', intervalKm: '', intervalMonths: '',
   lastDoneKm: '', lastDoneDate: '', notes: '',
 }
 
@@ -101,6 +102,7 @@ export default function MaintenancePlanDealer({ vehicleId, currentMileage }: Pro
     setEditId(item.id)
     setForm({
       operationType: item.operationType,
+      dueDate: item.dueDate ? item.dueDate.slice(0, 10) : '',
       intervalKm: item.intervalKm != null ? String(item.intervalKm) : '',
       intervalMonths: item.intervalMonths != null ? String(item.intervalMonths) : '',
       lastDoneKm: item.lastDoneKm != null ? String(item.lastDoneKm) : '',
@@ -126,6 +128,7 @@ export default function MaintenancePlanDealer({ vehicleId, currentMileage }: Pro
     setSubmitting(true)
     const body = {
       operationType: form.operationType,
+      dueDate: form.dueDate || undefined,
       intervalKm: form.intervalKm ? parseInt(form.intervalKm) : undefined,
       intervalMonths: form.intervalMonths ? parseInt(form.intervalMonths) : undefined,
       lastDoneKm: form.lastDoneKm ? parseInt(form.lastDoneKm) : undefined,
@@ -306,9 +309,20 @@ export default function MaintenancePlanDealer({ vehicleId, currentMileage }: Pro
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Date d'échéance</label>
+                <input
+                  type="date"
+                  value={form.dueDate}
+                  onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm"
+                />
+                <p className="text-xs text-[var(--color-text-secondary)] mt-1">Prioritaire sur les intervalles. La couleur change à l'approche de la date.</p>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Intervalle km</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Intervalle km <span className="font-normal text-[var(--color-text-secondary)]">(optionnel)</span></label>
                   <input
                     type="number" min="1"
                     value={form.intervalKm}
@@ -318,7 +332,7 @@ export default function MaintenancePlanDealer({ vehicleId, currentMileage }: Pro
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Intervalle mois</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Intervalle mois <span className="font-normal text-[var(--color-text-secondary)]">(optionnel)</span></label>
                   <input
                     type="number" min="1"
                     value={form.intervalMonths}
@@ -374,7 +388,7 @@ export default function MaintenancePlanDealer({ vehicleId, currentMileage }: Pro
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting || !form.operationType || (!form.intervalKm && !form.intervalMonths)}
+                  disabled={submitting || !form.operationType || (!form.dueDate && !form.intervalKm && !form.intervalMonths)}
                   className="flex-1 py-2 rounded-lg font-medium text-white text-sm transition disabled:opacity-60"
                   style={{ backgroundColor: 'var(--color-primary)' }}
                 >

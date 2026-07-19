@@ -1,6 +1,7 @@
 export interface PlanItem {
   id: string
   operationType: string
+  dueDate: string | null
   intervalKm: number | null
   intervalMonths: number | null
   lastDoneKm: number | null

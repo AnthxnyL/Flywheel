@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
 import MaintenancePlanDealer from '../../components/MaintenancePlanDealer'
 import Invoices from '../../components/Invoices'
+import type { PlanItem } from '../../types/maintenance'
 
 interface MileageRecord {
   id: string
@@ -67,6 +68,7 @@ export default function VehicleDetailPage() {
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<Tab>('fiche')
+  const [planItems, setPlanItems] = useState<PlanItem[]>([])
 
   const [showAssign, setShowAssign] = useState(false)
   const [selectedDriver, setSelectedDriver] = useState('')
@@ -95,7 +97,10 @@ export default function VehicleDetailPage() {
     setClients(res.data)
   }
 
-  useEffect(() => { loadVehicle(); loadClients() }, [id])
+  useEffect(() => {
+    loadVehicle(); loadClients()
+    if (id) api.get<PlanItem[]>(`/vehicles/${id}/plan`).then(r => setPlanItems(r.data)).catch(() => {})
+  }, [id])
 
   async function handleAssign(e: React.FormEvent) {
     e.preventDefault()
@@ -335,22 +340,40 @@ export default function VehicleDetailPage() {
                 <button onClick={() => setTab('plan')} style={{ fontSize: 11, color: 'var(--fw-green)', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}>Modifier →</button>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, flex: 1 }}>
-                {[
-                  { label: 'Vidange huile', status: 'J-7 Urgent', date: '15 juil. 2025', km: '50 000', bg: 'var(--fw-warning-tint)', border: 'rgba(232,151,13,0.2)', badgeColor: '#8A5500', dot: 'var(--fw-warning)' },
-                  { label: 'Contrôle freins', status: 'J+45', date: '20 août 2025', km: '55 000', bg: 'var(--fw-bg)', border: 'rgba(0,0,0,0.06)', badgeColor: 'var(--fw-text-2)', dot: '#F59E0B' },
-                  { label: 'Révision 60 000 km', status: 'Planifié', date: '15 nov. 2025', km: '60 000', bg: 'var(--fw-info-tint)', border: 'rgba(46,111,219,0.15)', badgeColor: '#1A4FA0', dot: 'var(--fw-info)' },
-                  { label: 'Filtres habitacle', status: '✓ Fait', date: '12 fév. 2025', km: '45 000', bg: 'var(--fw-green-tint)', border: 'rgba(45,189,122,0.2)', badgeColor: '#1A7A4A', dot: 'var(--fw-green)', done: true },
-                ].map(({ label, status, date, km, bg, border, badgeColor, dot, done }) => (
-                  <div key={label} style={{ background: bg, borderRadius: 10, padding: '13px 14px', border: `1px solid ${border}` }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontSize: 9.5, fontWeight: 700, color: badgeColor, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{status}</span>
-                      <div style={{ width: 7, height: 7, background: dot, borderRadius: '50%', opacity: done ? 0.5 : 1 }} />
-                    </div>
-                    <div style={{ fontSize: 12, fontWeight: done ? 500 : 600, color: done ? 'var(--fw-text-2)' : 'var(--fw-text)', textDecoration: done ? 'line-through' : undefined, marginBottom: 3 }}>{label}</div>
-                    <div style={{ fontSize: 10.5, color: 'var(--fw-text-2)' }}>{date}</div>
-                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, color: 'var(--fw-text-2)' }}>{km} km</div>
-                  </div>
-                ))}
+                {planItems.length === 0 ? (
+                  <div style={{ gridColumn: '1/-1', fontSize: 12, color: 'var(--fw-text-2)', padding: '4px 0' }}>Aucun plan défini.</div>
+                ) : (
+                  (() => {
+                    const overdue = planItems.filter(i => i.status === 'overdue')
+                    const soon = planItems.filter(i => i.status === 'soon')
+                    const ok = planItems.filter(i => i.status === 'ok')
+                    return [...overdue, ...soon, ...ok].slice(0, 4).map(item => {
+                      const isOverdue = item.status === 'overdue'
+                      const isSoon = item.status === 'soon'
+                      const bg = isOverdue ? 'var(--fw-warning-tint)' : isSoon ? 'var(--fw-warning-tint)' : 'var(--fw-green-tint)'
+                      const border = isOverdue ? 'rgba(232,151,13,0.2)' : isSoon ? 'rgba(232,151,13,0.12)' : 'rgba(45,189,122,0.2)'
+                      const dot = isOverdue ? 'var(--fw-danger)' : isSoon ? 'var(--fw-warning)' : 'var(--fw-green)'
+                      const badgeColor = isOverdue ? '#B01C1C' : isSoon ? '#8A5500' : '#1A7A4A'
+                      const badge = isOverdue ? '⚠ En retard'
+                        : isSoon ? (item.alertDays != null ? `J-${item.alertDays}` : 'Bientôt')
+                        : '✓ À jour'
+                      const dateStr = item.nextDueDate
+                        ? new Date(item.nextDueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+                        : ''
+                      return (
+                        <div key={item.id} style={{ background: bg, borderRadius: 10, padding: '13px 14px', border: `1px solid ${border}` }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                            <span style={{ fontSize: 9.5, fontWeight: 700, color: badgeColor, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{badge}</span>
+                            <div style={{ width: 7, height: 7, background: dot, borderRadius: '50%' }} />
+                          </div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--fw-text)', marginBottom: 3 }}>{item.operationType}</div>
+                          {dateStr && <div style={{ fontSize: 10.5, color: 'var(--fw-text-2)' }}>{dateStr}</div>}
+                          {item.nextDueKm != null && <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, color: 'var(--fw-text-2)' }}>{item.nextDueKm.toLocaleString('fr-FR')} km</div>}
+                        </div>
+                      )
+                    })
+                  })()
+                )}
               </div>
             </div>
 
@@ -377,9 +400,6 @@ export default function VehicleDetailPage() {
                 </div>
               )}
             </div>
-
-            {/* Maintenance plan */}
-            <MaintenancePlanDealer vehicleId={vehicle.id} currentMileage={vehicle.mileage} />
 
             {/* Invoices */}
             <Invoices

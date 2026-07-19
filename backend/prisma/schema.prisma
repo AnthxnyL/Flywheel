@@ -164,6 +164,7 @@ model MaintenancePlanItem {
   vehicleId       String
   vehicle         Vehicle   @relation(fields: [vehicleId], references: [id])
   operationType   String    // "Vidange", "Freins avant", "Courroie de distribution"…
+  dueDate         DateTime? // fixed deadline set by dealer
   intervalKm      Int?      // recur every X km  (null = time-only)
   intervalMonths  Int?      // recur every X months (null = mileage-only)
   lastDoneKm      Int?      // km reading when last performed

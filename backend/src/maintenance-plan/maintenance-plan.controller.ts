@@ -33,7 +33,7 @@ export class MaintenancePlanController {
   // Mark an operation as done — resets lastDoneKm/lastDoneDate to now
   @Post(':itemId/done')
   @HttpCode(200)
-  @Roles('DEALER')
+  @Roles('DEALER', 'DRIVER')
   markDone(@Param('vehicleId') vehicleId: string, @Param('itemId') itemId: string, @Body() dto: MarkDoneDto) {
     return this.plan.markDone(vehicleId, itemId, dto)
   }

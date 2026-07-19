@@ -3,9 +3,11 @@ import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
 import MaintenancePlanDriver from '../../components/MaintenancePlanDriver'
 import NotificationSettings from '../../components/NotificationSettings'
+import Invoices from '../../components/Invoices'
 import LogbookDriver from './LogbookPage'
 import { registerServiceWorker } from '../../services/push'
 import { X } from 'lucide-react'
+import type { PlanItem } from '../../types/maintenance'
 
 interface MileageRecord {
   id: string
@@ -28,7 +30,7 @@ interface Vehicle {
   mileageRecords: MileageRecord[]
 }
 
-type NavItem = 'dashboard' | 'plan' | 'logbook' | 'settings'
+type NavItem = 'dashboard' | 'plan' | 'logbook' | 'invoices' | 'settings'
 
 
 function FlywheelIcon() {
@@ -60,6 +62,7 @@ export default function DriverDashboardPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
   const [navItem, setNavItem] = useState<NavItem>('dashboard')
+  const [planItems, setPlanItems] = useState<PlanItem[]>([])
 
   const [showMileage, setShowMileage] = useState(false)
   const [mileageValue, setMileageValue] = useState('')
@@ -79,6 +82,12 @@ export default function DriverDashboardPage() {
   useEffect(() => { loadVehicles() }, [])
 
   const vehicle = vehicles[0] ?? null
+
+  useEffect(() => {
+    if (!vehicle) return
+    api.get<PlanItem[]>(`/vehicles/${vehicle.id}/plan`).then(r => setPlanItems(r.data)).catch(() => {})
+  }, [vehicle?.id])
+
   const contract = vehicle?.contracts[0] ?? null
   const mileagePercent = contract ? Math.min(100, Math.round((vehicle!.mileage / contract.mileageLimit) * 100)) : null
   const daysLeft = contract ? Math.max(0, Math.ceil((new Date(contract.endDate).getTime() - Date.now()) / 86400000)) : null
@@ -143,6 +152,17 @@ export default function DriverDashboardPage() {
           </div>
         </SidebarIcon>
 
+        <SidebarIcon active={navItem === 'invoices'}>
+          <div onClick={() => setNavItem('invoices')}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <rect x="4" y="2" width="16" height="20" rx="2" stroke={navItem === 'invoices' ? '#2DBD7A' : 'rgba(255,255,255,0.3)'} strokeWidth="1.5"/>
+              <line x1="8" y1="8" x2="16" y2="8" stroke={navItem === 'invoices' ? '#2DBD7A' : 'rgba(255,255,255,0.3)'} strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="8" y1="12" x2="16" y2="12" stroke={navItem === 'invoices' ? '#2DBD7A' : 'rgba(255,255,255,0.3)'} strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="8" y1="16" x2="12" y2="16" stroke={navItem === 'invoices' ? '#2DBD7A' : 'rgba(255,255,255,0.3)'} strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </div>
+        </SidebarIcon>
+
         <SidebarIcon active={navItem === 'settings'}>
           <div onClick={() => setNavItem('settings')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -165,7 +185,7 @@ export default function DriverDashboardPage() {
         <div style={{ padding: '20px 28px 0', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ fontSize: 12, color: 'var(--fw-text-2)' }}>
             Mon espace <span style={{ margin: '0 5px', opacity: 0.4 }}>/</span>
-            <span style={{ color: 'var(--fw-text)', fontWeight: 600 }}>{navItem === 'dashboard' ? 'Mon Véhicule' : navItem === 'logbook' ? 'Carnet de vie' : navItem === 'plan' ? "Plan d'entretien" : 'Paramètres'}</span>
+            <span style={{ color: 'var(--fw-text)', fontWeight: 600 }}>{navItem === 'dashboard' ? 'Mon Véhicule' : navItem === 'logbook' ? 'Carnet de vie' : navItem === 'plan' ? "Plan d'entretien" : navItem === 'invoices' ? 'Mes factures' : 'Paramètres'}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--fw-text)' }}>{firstName}</span>
@@ -176,7 +196,11 @@ export default function DriverDashboardPage() {
         <div style={{ flex: 1, overflowY: 'auto', padding: '14px 28px 28px' }}>
 
           {/* ── PLAN D'ENTRETIEN view ── */}
-          {navItem === 'plan' && vehicle && <MaintenancePlanDriver vehicleId={vehicle.id} />}
+          {navItem === 'plan' && vehicle && <MaintenancePlanDriver vehicleId={vehicle.id} currentMileage={vehicle.mileage} />}
+
+          {navItem === 'invoices' && vehicle && (
+            <Invoices vehicleId={vehicle.id} canUpload={false} canDelete={false} userRole="DRIVER" userId={user?.id} />
+          )}
 
           {/* ── CARNET view ── */}
           {navItem === 'logbook' && vehicle && <LogbookDriver vehicleId={vehicle.id} />}
@@ -305,26 +329,44 @@ export default function DriverDashboardPage() {
                       <button onClick={() => setNavItem('plan')} style={{ fontSize: 11, color: 'var(--fw-green)', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}>Voir tout →</button>
                     </div>
                     <div>
-                      {[
-                        { label: 'Vidange huile moteur', date: '15 juil. 2025', km: '50 000', badge: 'J-7 Urgent', badgeBg: 'var(--fw-warning-tint)', badgeColor: '#8A5500', dot: 'var(--fw-warning)', dotOpacity: 1 },
-                        { label: 'Contrôle freins avant', date: '20 août 2025', km: '55 000', badge: 'J+45', badgeBg: 'var(--fw-warning-tint)', badgeColor: '#6B4200', dot: '#F59E0B', dotOpacity: 0.55 },
-                        { label: 'Révision complète 60 000 km', date: '15 nov. 2025', km: '60 000', badge: 'Planifié', badgeBg: 'var(--fw-info-tint)', badgeColor: '#1A4FA0', dot: 'var(--fw-info)', dotOpacity: 0.55 },
-                        { label: 'Remplacement filtres habitacle', date: '12 fév. 2025', km: '45 000', badge: '✓ Fait', badgeBg: 'var(--fw-green-tint)', badgeColor: '#1A7A4A', dot: 'var(--fw-green)', dotOpacity: 0.5, done: true },
-                      ].map((item, i, arr) => (
-                        <div key={item.label} style={{ display: 'flex', gap: 13, padding: '9px 0', borderBottom: i < arr.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, paddingTop: 2 }}>
-                            <div style={{ width: 10, height: 10, background: item.dot, borderRadius: '50%', border: i === 0 ? '2px solid white' : undefined, boxShadow: i === 0 ? `0 0 0 1.5px ${item.dot}` : undefined, opacity: item.dotOpacity }} />
-                            {i < arr.length - 1 && <div style={{ width: 1, flex: 1, minHeight: 20, marginTop: 4, background: 'rgba(0,0,0,0.08)' }} />}
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                              <div style={{ fontSize: 12.5, fontWeight: item.done ? 400 : 600, color: item.done ? 'var(--fw-text-3)' : 'var(--fw-text)', textDecoration: item.done ? 'line-through' : undefined }}>{item.label}</div>
-                              <span style={{ fontSize: 9.5, fontWeight: 700, color: item.badgeColor, background: item.badgeBg, padding: '2px 7px', borderRadius: 20 }}>{item.badge}</span>
-                            </div>
-                            <div style={{ fontSize: 11, color: 'var(--fw-text-2)' }}>{item.date} · {item.km} km</div>
-                          </div>
-                        </div>
-                      ))}
+                      {planItems.length === 0 ? (
+                        <div style={{ fontSize: 12, color: 'var(--fw-text-2)', padding: '8px 0' }}>Aucun plan défini par votre concessionnaire.</div>
+                      ) : (
+                        (() => {
+                          const overdue = planItems.filter(i => i.status === 'overdue')
+                          const soon = planItems.filter(i => i.status === 'soon')
+                          const ok = planItems.filter(i => i.status === 'ok')
+                          const sorted = [...overdue, ...soon, ...ok].slice(0, 4)
+                          return sorted.map((item, i, arr) => {
+                            const dot = item.status === 'overdue' ? 'var(--fw-danger)' : item.status === 'soon' ? 'var(--fw-warning)' : 'var(--fw-green)'
+                            const badgeBg = item.status === 'overdue' ? 'var(--fw-danger-tint)' : item.status === 'soon' ? 'var(--fw-warning-tint)' : 'var(--fw-green-tint)'
+                            const badgeColor = item.status === 'overdue' ? '#B01C1C' : item.status === 'soon' ? '#8A5500' : '#1A7A4A'
+                            const badge = item.status === 'overdue' ? '⚠ En retard'
+                              : item.status === 'soon'
+                                ? (item.alertDays != null ? `J-${item.alertDays}` : item.alertKm != null ? `${item.alertKm.toLocaleString('fr-FR')} km` : 'Bientôt')
+                                : '✓ À jour'
+                            const sub = [
+                              item.nextDueDate && new Date(item.nextDueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }),
+                              item.nextDueKm != null && `${item.nextDueKm.toLocaleString('fr-FR')} km`,
+                            ].filter(Boolean).join(' · ')
+                            return (
+                              <div key={item.id} style={{ display: 'flex', gap: 13, padding: '9px 0', borderBottom: i < arr.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, paddingTop: 2 }}>
+                                  <div style={{ width: 10, height: 10, background: dot, borderRadius: '50%', border: i === 0 ? '2px solid white' : undefined, boxShadow: i === 0 ? `0 0 0 1.5px ${dot}` : undefined }} />
+                                  {i < arr.length - 1 && <div style={{ width: 1, flex: 1, minHeight: 20, marginTop: 4, background: 'rgba(0,0,0,0.08)' }} />}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                                    <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--fw-text)' }}>{item.operationType}</div>
+                                    <span style={{ fontSize: 9.5, fontWeight: 700, color: badgeColor, background: badgeBg, padding: '2px 7px', borderRadius: 20 }}>{badge}</span>
+                                  </div>
+                                  {sub && <div style={{ fontSize: 11, color: 'var(--fw-text-2)' }}>{sub}</div>}
+                                </div>
+                              </div>
+                            )
+                          })
+                        })()
+                      )}
                     </div>
                   </div>
 

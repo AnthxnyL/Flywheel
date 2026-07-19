@@ -7,6 +7,7 @@ import { MarkDoneDto } from './dto/mark-done.dto'
 export interface PlanItemWithStatus {
   id: string
   operationType: string
+  dueDate: Date | null
   intervalKm: number | null
   intervalMonths: number | null
   lastDoneKm: number | null
@@ -14,21 +15,39 @@ export interface PlanItemWithStatus {
   notes: string | null
   nextDueKm: number | null
   nextDueDate: Date | null
-  // 'ok' | 'soon' | 'overdue'
   status: 'ok' | 'soon' | 'overdue'
-  alertKm: number | null   // km remaining before due (negative = overdue)
-  alertDays: number | null // days remaining before due (negative = overdue)
+  alertKm: number | null
+  alertDays: number | null
 }
 
-function computeStatus(
-  item: { intervalKm: number | null; intervalMonths: number | null; lastDoneKm: number | null; lastDoneDate: Date | null },
-  currentMileage: number,
-): Pick<PlanItemWithStatus, 'nextDueKm' | 'nextDueDate' | 'status' | 'alertKm' | 'alertDays'> {
+type RawItem = {
+  id: string
+  operationType: string
+  dueDate: Date | null
+  intervalKm: number | null
+  intervalMonths: number | null
+  lastDoneKm: number | null
+  lastDoneDate: Date | null
+  notes: string | null
+}
+
+function computeStatus(item: RawItem, currentMileage: number): Pick<PlanItemWithStatus, 'nextDueKm' | 'nextDueDate' | 'status' | 'alertKm' | 'alertDays'> {
   const now = new Date()
   let nextDueKm: number | null = null
   let nextDueDate: Date | null = null
   let alertKm: number | null = null
   let alertDays: number | null = null
+
+  // Fixed due date takes priority over interval calculation
+  if (item.dueDate) {
+    nextDueDate = item.dueDate
+    alertDays = Math.ceil((item.dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  } else if (item.intervalMonths !== null) {
+    const base = item.lastDoneDate ? new Date(item.lastDoneDate) : now
+    nextDueDate = new Date(base)
+    nextDueDate.setMonth(nextDueDate.getMonth() + item.intervalMonths)
+    alertDays = Math.ceil((nextDueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  }
 
   if (item.intervalKm !== null) {
     const base = item.lastDoneKm ?? 0
@@ -36,18 +55,8 @@ function computeStatus(
     alertKm = nextDueKm - currentMileage
   }
 
-  if (item.intervalMonths !== null) {
-    const base = item.lastDoneDate ? new Date(item.lastDoneDate) : now
-    nextDueDate = new Date(base)
-    nextDueDate.setMonth(nextDueDate.getMonth() + item.intervalMonths)
-    alertDays = Math.ceil((nextDueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-  }
-
-  // Overdue: any threshold exceeded
   const kmOverdue = alertKm !== null && alertKm < 0
   const dateOverdue = alertDays !== null && alertDays < 0
-
-  // Soon threshold: <10% of interval remaining in km, or <30 days
   const kmSoon = alertKm !== null && alertKm >= 0 && item.intervalKm !== null && alertKm < item.intervalKm * 0.1
   const dateSoon = alertDays !== null && alertDays >= 0 && alertDays < 30
 
@@ -68,7 +77,7 @@ export class MaintenancePlanService {
     return vehicle.mileage
   }
 
-  private enrich(item: { id: string; operationType: string; intervalKm: number | null; intervalMonths: number | null; lastDoneKm: number | null; lastDoneDate: Date | null; notes: string | null }, mileage: number): PlanItemWithStatus {
+  private enrich(item: RawItem, mileage: number): PlanItemWithStatus {
     return { ...item, ...computeStatus(item, mileage) }
   }
 
@@ -82,14 +91,15 @@ export class MaintenancePlanService {
   }
 
   async create(vehicleId: string, dto: CreatePlanItemDto): Promise<PlanItemWithStatus> {
-    if (!dto.intervalKm && !dto.intervalMonths) {
-      throw new BadRequestException('Au moins un intervalle (km ou mois) est requis.')
+    if (!dto.dueDate && !dto.intervalKm && !dto.intervalMonths) {
+      throw new BadRequestException('Une date d\'échéance ou un intervalle (km ou mois) est requis.')
     }
     const mileage = await this.getVehicleMileage(vehicleId)
     const item = await this.prisma.maintenancePlanItem.create({
       data: {
         vehicleId,
         operationType: dto.operationType,
+        dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
         intervalKm: dto.intervalKm,
         intervalMonths: dto.intervalMonths,
         lastDoneKm: dto.lastDoneKm,
@@ -109,6 +119,7 @@ export class MaintenancePlanService {
       where: { id: itemId },
       data: {
         ...(dto.operationType !== undefined && { operationType: dto.operationType }),
+        ...(dto.dueDate !== undefined && { dueDate: dto.dueDate ? new Date(dto.dueDate) : null }),
         ...(dto.intervalKm !== undefined && { intervalKm: dto.intervalKm }),
         ...(dto.intervalMonths !== undefined && { intervalMonths: dto.intervalMonths }),
         ...(dto.lastDoneKm !== undefined && { lastDoneKm: dto.lastDoneKm }),
@@ -124,11 +135,14 @@ export class MaintenancePlanService {
     if (!existing || existing.vehicleId !== vehicleId) throw new NotFoundException('Plan item not found')
 
     const mileage = await this.getVehicleMileage(vehicleId)
+    const doneDate = dto.doneAtDate ? new Date(dto.doneAtDate) : new Date()
     const item = await this.prisma.maintenancePlanItem.update({
       where: { id: itemId },
       data: {
         lastDoneKm: dto.doneAtKm ?? mileage,
-        lastDoneDate: dto.doneAtDate ? new Date(dto.doneAtDate) : new Date(),
+        lastDoneDate: doneDate,
+        // Clear the fixed due date once marked as done
+        dueDate: null,
       },
     })
     return this.enrich(item, mileage)

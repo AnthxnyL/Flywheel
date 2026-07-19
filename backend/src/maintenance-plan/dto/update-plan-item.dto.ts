@@ -6,6 +6,10 @@ export class UpdatePlanItemDto {
   operationType?: string
 
   @IsOptional()
+  @IsDateString()
+  dueDate?: string
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   intervalKm?: number
