@@ -1,6 +1,6 @@
 # Flywheel
 
-Application web de suivi d'entretien véhicule en marque blanche, destinée aux contrats LOA/LLD.
+Application web de suivi d'entretien véhicule, destinée aux contrats LOA/LLD.
 
 ## Stack
 
